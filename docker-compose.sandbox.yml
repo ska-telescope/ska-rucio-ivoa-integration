@@ -1,0 +1,10 @@
+version: "3.5"
+services:
+  tomcat:
+    build:
+      args:
+       - TOMCAT_TAPSERVER_BASE_URL=/ivoa#tapserver
+  jupyter:
+    environment:
+      - JUPYTER_SERVER_PASSWORD=secret
+      - JUPYTER_SERVER_BASE_URL=/jupyter/
