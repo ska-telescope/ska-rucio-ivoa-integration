@@ -27,8 +27,8 @@ services:
     networks:
       - common
   jupyter:
-    container_name: jupyter
-    image: jupyter
+    container_name: jupyter-vo
+    image: jupyter-vo
     build:
       context: ./jupyter
       dockerfile: Dockerfile
