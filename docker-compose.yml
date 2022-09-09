@@ -1,0 +1,44 @@
+version: "3.5"
+services:
+  postgres:
+    container_name: postgres-metadata
+    image: postgres-metadata:14
+    build:
+      context: ./postgres-metadata
+      dockerfile: Dockerfile
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=metadata
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+    networks:
+      - common
+  tomcat:
+    container_name: tomcat-tap
+    image: tomcat-tap:9
+    build:
+      context: ./tomcat-tap
+      dockerfile: Dockerfile
+      args:
+       - TOMCAT_TAPSERVER_BASE_URL=/
+    ports:
+      - 8080:8080
+    networks:
+      - common
+  jupyter:
+    container_name: jupyter
+    image: jupyter
+    build:
+      context: ./jupyter
+      dockerfile: Dockerfile
+    ports:
+      - 8888:8888
+    environment:
+      - JUPYTER_SERVER_PASSWORD=secret
+      - JUPYTER_SERVER_BASE_URL=/
+    networks:
+      - common
+
+networks:
+  common:
