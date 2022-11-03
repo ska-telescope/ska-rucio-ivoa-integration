@@ -1,5 +1,16 @@
 version: "3.5"
 services:
+  pgadmin:
+    container_name: pgadmin4
+    image: dpage/pgadmin4:latest
+    ports:
+      80:8889
+    environment:
+      - PGADMIN_DEFAULT_PASSWORD=secret
+    networks:
+      - common
+    volumes:
+      - ./pgadmin/etc/servers.json:/pgadmin4/servers.json
   tomcat:
     build:
       args:
