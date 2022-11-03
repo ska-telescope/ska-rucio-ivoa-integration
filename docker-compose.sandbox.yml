@@ -4,8 +4,9 @@ services:
     container_name: pgadmin4
     image: dpage/pgadmin4:latest
     ports:
-      80:8889
+      - 8889:80
     environment:
+      - PGADMIN_DEFAULT_EMAIL=email@email.com      
       - PGADMIN_DEFAULT_PASSWORD=secret
     networks:
       - common
@@ -17,5 +18,5 @@ services:
        - TOMCAT_TAPSERVER_BASE_URL=/ivoa#tapserver
   jupyter:
     environment:
-      - JUPYTER_SERVER_PASSWORD=
+      - JUPYTER_SERVER_PASSWORD=secret
       - JUPYTER_SERVER_BASE_URL=/ivoa/jupyter/
