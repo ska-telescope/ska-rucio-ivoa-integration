@@ -7,6 +7,7 @@ This integration demonstrates how to integrate an IVOA TAP service with an exter
 1. an instance of Apache Tomcat running the [TAP library](http://cdsportal.u-strasbg.fr/taptuto/index.html) servlet (`tomcat-tap`), and
 2. an instance of postgres with the [pgSphere](https://pgsphere.github.io/) extension enabled and necessary schema (`postgres-metadata`), and 
 3. a jupyter notebook with example TAP query code using [pyvo](https://pypi.org/project/pyvo/) (`jupyter`)
+4. a pgadmin4 instance connected with preopopulated parameters for the postgres backend (sandbox only)
 
 The `tomcat-tap` service provides a TAP interface to the postgres backend.
 
@@ -18,6 +19,15 @@ The `postgres-metadata` service exposes a database with the following constructi
 - A function and trigger that updates the `ivoa.obscore` table from `rucio.dids` everytime there is an `INSERT` or `UPDATE` statement
 
 The function to insert/update records in the `ivoa.obscore` table is set up in such a way that updates to the `rucio.dids.data` column will first delete any row where both `rucio.dids.scope` = `ivoa.obscore.rucio_did_scope` and `rucio.dids.name` = `ivoa.obscore.rucio_did_name` before inserting, i.e. the function is essentially an upsert, keeping data in sync between the two tables.
+
+### Sandbox endpoints
+
+| Service | Port | Landing page | Default user | Default password | Other credentials |
+|---------|------|--------------|--------------|------------------|-------------------|
+| tomcat-tap | 8080 | http://localhost:8080/ivoa/tapserver/tap | | | |
+| jupyter-vo | 8888 | http://localhost:8888/ivoa/jupyter/lab | | secret |  |
+| postgres-metadata | 5432 | | postgres | secret | database=metadata |
+| pgadmin4 | 8889 | http://localhost:8889 | | secret | |
 
 ### Considerations
 
