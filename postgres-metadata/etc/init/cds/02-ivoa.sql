@@ -59,7 +59,8 @@ BEGIN
                 SELECT * FROM jsonb_populate_record(null::ivoa.obscore_row, NEW.data || jsonb_build_object('rucio_did_scope', NEW.scope, 'rucio_did_name', NEW.name));
         RETURN NEW;
 EXCEPTION
-        WHEN not_null_violation THEN NULL;
+        WHEN not_null_violation THEN 
+	        RAISE NOTICE 'json data is missing a required, not-null field.';	
         RETURN OLD;
 END;
 $$

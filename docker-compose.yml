@@ -1,5 +1,20 @@
 version: "3.5"
 services:
+  dachs:
+    container_name: dachs
+    image: dachs
+    build:
+      context: ./dachs
+      dockerfile: Dockerfile
+    environment:
+      - DACHS_POSTGRES_HOST=postgres-metadata
+      - DACHS_POSTGRES_DBNAME=metadata
+      - GAVORC_SERVER_URL=http://localhost:8080/
+      - GAVORC_SERVER_PORT=8080
+    ports:
+      - 8080:8080
+    networks:
+      - common
   postgres:
     container_name: postgres-metadata
     image: postgres-metadata:14
@@ -9,11 +24,16 @@ services:
     ports:
       - 5432:5432
     environment:
+      - PGDATA=/var/lib/postgresql/data
       - POSTGRES_DB=metadata
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=secret
     networks:
       - common
+    command:
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
   tomcat:
     container_name: tomcat-tap
     image: tomcat-tap:9
@@ -21,7 +41,7 @@ services:
       context: ./tomcat-tap
       dockerfile: Dockerfile
       args:
-       - TOMCAT_TAPSERVER_BASE_URL=/
+       - TOMCAT_TAPSERVER_BASE_URL=/tapserver
     ports:
       - 8080:8080
     networks:
@@ -42,3 +62,7 @@ services:
 
 networks:
   common:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.0.0.0/16

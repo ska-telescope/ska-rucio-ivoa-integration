@@ -1,9 +1,15 @@
-FROM postgres:14
+FROM postgres:14.5
 
-RUN apt-get update -y && apt-get install -y wget cmake postgresql-server-dev-14
+# this is relative to etc/init/ and defines database initialisation scripts
+ARG POSTGRES_INIT_DIR
 
-RUN wget -qO- https://github.com/akorotkov/pgsphere/archive/master.tar.gz | tar xvz
-RUN (cd pgsphere-master && make CFLAGS=-std=c99 USE_PGXS=1 PG_CONFIG=/usr/bin/pg_config)
-RUN (cd pgsphere-master && make CFLAGS=-std=c99 USE_PGXS=1 PG_CONFIG=/usr/bin/pg_config install)
+RUN apt-get update -y && apt-get install -y wget cmake postgresql-server-dev-14 postgresql-14-pgsphere postgresql-14-q3c
 
-COPY etc/init/* /docker-entrypoint-initdb.d/ 
+#RUN wget -qO- https://github.com/akorotkov/pgsphere/archive/master.tar.gz | tar xvz
+#RUN (cd pgsphere-master && make CFLAGS=-std=c99 USE_PGXS=1 PG_CONFIG=/usr/bin/pg_config)
+#RUN (cd pgsphere-master && make CFLAGS=-std=c99 USE_PGXS=1 PG_CONFIG=/usr/bin/pg_config install)
+
+COPY etc/postgres/postgresql.conf /etc/postgresql/postgresql.conf
+COPY etc/postgres/pg_hba.conf /etc/postgresql/pg_hba.conf
+
+COPY etc/init/$POSTGRES_INIT_DIR/* /docker-entrypoint-initdb.d/

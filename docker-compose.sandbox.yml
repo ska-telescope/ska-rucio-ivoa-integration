@@ -1,5 +1,16 @@
 version: "3.5"
 services:
+  dachs:
+    container_name: dachs
+    environment:
+      - DACHS_POSTGRES_HOST=postgres-metadata
+      - DACHS_POSTGRES_DBNAME=metadata
+      - GAVORC_SERVER_URL=http://localhost:8080/ivoa
+      - GAVORC_SERVER_PORT=8080
+    ports:
+      - 8080:8080
+    networks:
+      - common
   pgadmin:
     container_name: pgadmin4
     image: dpage/pgadmin4:latest

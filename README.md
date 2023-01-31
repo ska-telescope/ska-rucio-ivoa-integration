@@ -2,16 +2,29 @@
 
 ## Architecture
 
-This integration demonstrates how to integrate an IVOA TAP service with an external Rucio metadata postgres database. It is comprised of three microservices:
+This integration demonstrates how to integrate an IVOA TAP service with an external Rucio metadata postgres database. Two technology stacks are currently supported:
 
-1. an instance of Apache Tomcat running the [TAP library](http://cdsportal.u-strasbg.fr/taptuto/index.html) servlet (`tomcat-tap`), and
-2. an instance of postgres with the [pgSphere](https://pgsphere.github.io/) extension enabled and necessary schema (`postgres-metadata`), and 
-3. a jupyter notebook with example TAP query code using [pyvo](https://pypi.org/project/pyvo/) (`jupyter`)
-4. a pgadmin4 instance connected with preopopulated parameters for the postgres backend (sandbox only)
+- the [TAP library from CDS]((http://cdsportal.u-strasbg.fr/taptuto/index.html))
+- [DaCHS](https://docs.g-vo.org/DaCHS/), and
 
-The `tomcat-tap` service provides a TAP interface to the postgres backend.
+It is comprised of five microservices, a combination of which need to be run for each stack. That is, one of 
 
-The `postgres-metadata` service exposes a database with the following construction:
+- an instance of Apache Tomcat running the CDS Tap library servlet (`tomcat-tap`), or
+- an instance of DaCHS (`dachs`)
+
+needs to be run along with a set of common services, some of which are optional: 
+
+1. an instance of postgres with the [pgSphere](https://pgsphere.github.io/) extension enabled and necessary schema (`postgres-metadata`), and 
+2. (optional) a jupyter notebook with example TAP query code using [pyvo](https://pypi.org/project/pyvo/) (`jupyter`), and 
+3. (optional) a pgadmin4 instance connected with preopopulated parameters for the postgres backend (sandbox only)
+
+Depending on the stack, the `postgres-metadata` service exposes a database with the necessary schema.
+
+Two compose files are available for local development and sandboxed (with path prefixes).
+
+### CDS Tap Library
+
+The backend for the CDS Tap library has the following:
 
 - A schema, `TAP_SCHEMA`, that contains the necessary tables to expose a TAP service (essentially a record of what tables/columns/keys the IVOA service uses),
 - A table, `dids`, under schema `rucio`, that "mocks" the table that the external postgres Rucio metadata interface interacts with. This table has nothing to do with IVOA, and is used to hold arbitrary Rucio metadata,
@@ -20,7 +33,17 @@ The `postgres-metadata` service exposes a database with the following constructi
 
 The function to insert/update records in the `ivoa.obscore` table is set up in such a way that updates to the `rucio.dids.data` column will first delete any row where both `rucio.dids.scope` = `ivoa.obscore.rucio_did_scope` and `rucio.dids.name` = `ivoa.obscore.rucio_did_name` before inserting, i.e. the function is essentially an upsert, keeping data in sync between the two tables.
 
-### Sandbox endpoints
+#### Endpoints
+
+##### Local
+
+| Service | Port | Landing page | Default user | Default password | Other credentials |
+|---------|------|--------------|--------------|------------------|-------------------|
+| tomcat-tap | 8080 | http://localhost:8080/tapserver/tap | | | |
+| jupyter-vo | 8888 | http://localhost:8888/jupyter/lab| | secret |  |
+| postgres-metadata | 5432 | | postgres | secret | database=metadata |
+
+##### Sandbox
 
 | Service | Port | Landing page | Default user | Default password | Other credentials |
 |---------|------|--------------|--------------|------------------|-------------------|
@@ -29,7 +52,7 @@ The function to insert/update records in the `ivoa.obscore` table is set up in s
 | postgres-metadata | 5432 | | postgres | secret | database=metadata |
 | pgadmin4 | 8889 | http://localhost:8889 | | secret | |
 
-### Considerations
+#### Considerations
 
 Three methods of architecting the database were considered:
 
@@ -45,14 +68,18 @@ Creating a single table (2) initially seems appealing, but requires  development
 
 Building another table and creating triggers (3) clearly demarcates what is handled by Rucio and what is an IVOA resource, but as mentioned, creates data duplication.
 
-## Deployment
+#### Deployment
 
-These services can be build and brought up using `docker-compose`:
+##### Local
+
+These services can be build and brought up using `docker-compose`, specifying the build argument `POSTGRES_INIT_DIR=cds`:
 
 ```bash
-$ docker-compose build
-$ docker-compose up
+$ docker-compose build --build-arg POSTGRES_INIT_DIR=cds postgres tomcat jupyter
+$ docker-compose up tomcat jupyter postgres
 ```
+
+##### Sandbox
 
 If exposing externally, remember to set:
 
@@ -62,7 +89,51 @@ If exposing externally, remember to set:
 
 It is possible to use docker-compose overrides to separate these variables, e.g. 
 
-`docker-compose -f docker-compose.yml -f docker-compose.sandbox.yml up`
+```bash
+$ docker-compose -f docker-compose.yml -f docker-compose.sandbox.yml build --build-arg POSTGRES_INIT_DIR=cds postgres tomcat jupyter pgadmin
+$ docker-compose -f docker-compose.yml -f docker-compose.sandbox.yml up tomcat jupyter postgres pgadmin`
+```
+
+### DaCHS
+
+#### Endpoints
+
+##### Local
+
+| Service | Port | Landing page | Default user | Default password | Other credentials |
+|---------|------|--------------|--------------|------------------|-------------------|
+| dachs| 8080 | http://localhost:8080/ | | | |
+| jupyter-vo | 8888 | http://localhost:8888/jupyter/lab| | secret |  |
+| postgres-metadata | 5432 | | postgres | secret | database=metadata |
+
+##### Sandbox
+
+TBD
+
+#### Deployment
+
+##### Local
+
+These services can be build and brought up using `docker-compose`, specifying the build argument `POSTGRES_INIT_DIR=dachs`:
+
+```bash
+$ docker-compose build --build-arg POSTGRES_INIT_DIR=dachs postgres dachs jupyter
+$ docker-compose up dachs jupyter postgres
+```
+
+##### Sandbox
+
+If exposing externally, remember to set:
+
+- `JUPYTER_SERVER_PASSWORD` for authentication with the jupyter notebook server,
+- `JUPYTER_SERVER_BASE_URL` if the base URL of the jupyter service is anything other than `/`, and
+
+It is possible to use docker-compose overrides to separate these variables, e.g. 
+
+```bash
+$ docker-compose -f docker-compose.yml -f docker-compose.sandbox.yml build --build-arg POSTGRES_INIT_DIR=dachs postgres dachs jupyter pgadmin
+$ docker-compose -f docker-compose.yml -f docker-compose.sandbox.yml up dachs jupyter postgres pgadmin`
+```
 
 ## Future
 
