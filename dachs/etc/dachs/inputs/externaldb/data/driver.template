@@ -1,0 +1,1 @@
+Driver={PostgreSQL UNICODE};Server=$DACHS_POSTGRES_HOST;Port=5432;Database=$DACHS_POSTGRES_DBNAME;Uid=dachsroot;
