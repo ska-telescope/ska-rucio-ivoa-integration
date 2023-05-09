@@ -10,38 +10,45 @@ CREATE TABLE rucio.dids (
 );
 
 CREATE TYPE rucio.obscore_row AS (
-    rucio_did_scope   character varying,
-    rucio_did_name    character varying,
-    dataproduct_type  character varying,
-    calib_level       integer,
-    obs_collection    character varying,
-    obs_id            character varying,
-    obs_publisher_did character varying,
-    access_url        text,
-    access_format     character varying,
-    access_estsize    bigint,
-    target_name       character varying,
-    s_ra              double precision,
-    s_dec             double precision,
-    s_fov             double precision,
-    s_region          spoly,
-    s_resolution      double precision,
-    s_xel1            bigint,
-    s_xel2            bigint,
-    t_min             double precision,
-    t_max             double precision,
-    t_exptime         double precision,
-    t_resolution      double precision,
-    t_xel             bigint,
-    em_min            double precision,
-    em_max            double precision,
-    em_res_power      double precision,
-    em_xel            bigint,
-    o_ucd             character varying,
-    pol_states        character varying,
-    pol_xel           bigint,
-    facility_name     character varying,
-    instrument_name   character varying
+    rucio_did_scope     character varying,
+    rucio_did_name      character varying,
+    dataproduct_type    character varying,
+    dataproduct_subtype character varying,
+    calib_level         integer,
+    obs_collection      character varying,
+    obs_id              character varying,
+    obs_publisher_did   character varying,
+    obs_title           character varying,
+    obs_creator_did     character varying,
+    target_class        character varying,
+    access_url          text,
+    access_format       character varying,
+    access_estsize      bigint,
+    target_name         character varying,
+    s_ra                double precision,
+    s_dec               double precision,
+    s_fov               double precision,
+    s_region            spoly,
+    s_resolution        double precision,
+    s_xel1              bigint,
+    s_xel2              bigint,
+    s_pixel_scale       double precision,
+    t_min               double precision,
+    t_max               double precision,
+    t_exptime           double precision,
+    t_resolution        double precision,
+    t_xel               bigint,
+    em_min              double precision,
+    em_max              double precision,
+    em_res_power        double precision,
+    em_xel              bigint,
+    em_ucd              character varying,
+    o_ucd               character varying,
+    pol_states          character varying,
+    pol_xel             bigint,
+    facility_name       character varying,
+    instrument_name     character varying,
+    preview             character varying
 );
 
 CREATE TABLE rucio.obscore OF rucio.obscore_row (
@@ -61,7 +68,7 @@ CREATE OR REPLACE FUNCTION rucio.upsert_obscore_record_from_rucio_metadata() RET
 $$
 BEGIN
         IF TG_OP = 'UPDATE' THEN
-                /* Delete the record first as ON CONFLICT upsert requires fields to be invidually named. */
+                /* Delete the record first as ON CONFLICT upsert requires fields to be individually named. */
                 DELETE FROM rucio.obscore WHERE rucio_did_scope = OLD.scope AND rucio_did_name = OLD.name;
         END IF;
     INSERT INTO rucio.obscore

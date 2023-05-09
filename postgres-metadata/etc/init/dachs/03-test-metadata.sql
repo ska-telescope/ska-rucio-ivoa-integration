@@ -3,3 +3,5 @@ INSERT INTO rucio.dids (vo, scope, name, data) VALUES ('def', 'test', 'name_2', 
 INSERT INTO rucio.dids (vo, scope, name, data) VALUES ('def', 'test', 'name_3', '{"calib_level": 2, "obs_collection": "collection_3", "obs_id": "id_3", "obs_publisher_did": "publisher_did_3"}');
 INSERT INTO rucio.dids (vo, scope, name, data) VALUES ('def', 'test', 'name_4', '{"calib_level": 3, "obs_collection": "collection_4", "obs_id": "id_4", "obs_publisher_did": "publisher_did_4"}');
 INSERT INTO rucio.dids (vo, scope, name, data) VALUES ('def', 'test', 'name_5', '{"calib_level": 4, "obs_collection": "collection_5", "obs_id": "id_5", "obs_publisher_did": "publisher_did_5"}');
+
+INSERT INTO rucio.dids (vo, scope, name, data) VALUES ('def', 'testing', 'PTF10tce.fits', '{"calib_level": 1, "obs_collection": "collection_testing", "obs_id": "testing:PTF10tce.fits", "obs_publisher_did": "testing", "s_ra": "349.7905833", "s_dec": "9.1960000", "access_format": "application/x-votable+xml;content=datalink", "access_url": "http://rucio_datalink:10000/links?id=testing:PTF10tce.fits"}');

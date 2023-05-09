@@ -1,6 +1,6 @@
 FROM jupyter/minimal-notebook
 
-RUN pip3 install pyvo psycopg2-binary
+RUN pip3 install pyvo psycopg2-binary matplotlib
 
 COPY --chown=root:users etc/generate_password.py .
 COPY --chown=root:users etc/jupyter_server_config.py /home/jovyan/.jupyter/jupyter_server_config.py

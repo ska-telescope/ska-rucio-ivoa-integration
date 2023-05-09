@@ -59,10 +59,31 @@ services:
       - JUPYTER_SERVER_BASE_URL=/
     networks:
       - common
-
+  datalink:
+    container_name: rucio_datalink
+    image: rucio-datalink
+    build:
+      context: ./rucio-datalink
+      dockerfile: Dockerfile
+    environment:
+      - RUCIO_CFG_AUTH_TYPE=oidc
+      - RUCIO_CFG_ACCOUNT=root
+      - RUCIO_CFG_OIDC_SCOPE=openid offline_access profile wlcg.groups
+      - RUCIO_CFG_OIDC_AUDIENCE=rucio https://wlcg.cern.ch/jwt/v1/any
+      - RUCIO_API_BASEURL=https://srcdev.skatelescope.org/rucio-dev/
+      - SITED_STORAGES_ENDPOINT_JSON=https://sited.srcdev.skao.int/storages/grafana
+      - IVOA_AUTHORITY=test.skao
+    env_file:
+      - .env
+    ports:
+      - 10000:10000
+    volumes:
+      - ./rucio-datalink/src:/opt/rucio_datalink/src:rw
+    networks:
+      - common
 networks:
   common:
     driver: bridge
     ipam:
      config:
-       - subnet: 10.0.0.0/16
+       - subnet: 10.1.0.0/16
