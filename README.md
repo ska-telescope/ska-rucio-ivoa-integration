@@ -217,6 +217,9 @@ $ docker-compose build --build-arg POSTGRES_INIT_DIR=dachs postgres dachs jupyte
 $ docker-compose up dachs jupyter postgres datalink
 ```
 
+##### Sandbox
+
+Not implemented. See `Notes`.
 
 ## Database considerations
 
