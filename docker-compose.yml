@@ -66,11 +66,11 @@ services:
       context: ./rucio-datalink
       dockerfile: Dockerfile
     environment:
+      - RUCIO_CFG_HOST=https://rucio.srcdev.skao.int
       - RUCIO_CFG_AUTH_TYPE=oidc
       - RUCIO_CFG_ACCOUNT=root
       - RUCIO_CFG_OIDC_SCOPE=openid offline_access profile wlcg.groups
       - RUCIO_CFG_OIDC_AUDIENCE=rucio https://wlcg.cern.ch/jwt/v1/any
-      - RUCIO_API_BASEURL=https://srcdev.skatelescope.org/rucio-dev/
       - SITED_STORAGES_ENDPOINT_JSON=https://sited.srcdev.skao.int/storages/grafana
       - IVOA_AUTHORITY=test.skao
     env_file:

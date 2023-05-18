@@ -35,7 +35,7 @@ fi
 # do a simple whoami query
 echo "querying Rucio endpoint for account details..."
 export ACCESS_TOKEN=`cat /tmp/user/.rucio_user/auth_token_for_account_$RUCIO_CFG_ACCOUNT`
-curl -s -XGET https://srcdev.skatelescope.org/rucio-dev/accounts/$RUCIO_CFG_ACCOUNT -H "X-Rucio-Auth-Token: $ACCESS_TOKEN" | jq
+curl -s -XGET $RUCIO_CFG_HOST/accounts/$RUCIO_CFG_ACCOUNT -H "X-Rucio-Auth-Token: $ACCESS_TOKEN" | jq
 
 # get geoip database
 if [ -v GEOIP_LICENSE_KEY ]

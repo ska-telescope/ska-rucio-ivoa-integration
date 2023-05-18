@@ -65,7 +65,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
             'name': name
         }]
     }
-    response = requests.post(urllib.parse.urljoin(config.get('RUCIO_API_BASEURL'), 'replicas/list'),
+    response = requests.post(urllib.parse.urljoin(config.get('RUCIO_CFG_HOST'), 'replicas/list'),
         headers={
             'X-Rucio-Auth-Token': token,
             'Content-type': 'application/json'
