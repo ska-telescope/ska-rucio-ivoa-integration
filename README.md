@@ -174,7 +174,7 @@ You may need to run `gavo imp` on the RD for it to make the table & show in the 
 
 Logfiles for DaCHS can be found at `/var/gavo/logs/dc*`.
 
-## Running an SCS service and enabling data access
+## Running an SCS service and enabling data access (DaCHS only)
 
 The following has only been considered for the DaCHS implementation and builds upon the TAP service implementation. See `Running a TAP service -> Using the DaCHS library` for 
 more information.
@@ -217,6 +217,9 @@ $ docker-compose build --build-arg POSTGRES_INIT_DIR=dachs postgres dachs jupyte
 $ docker-compose up dachs jupyter postgres datalink
 ```
 
+##### Sandbox
+
+Not implemented. See `Notes`.
 
 ## Database considerations
 
