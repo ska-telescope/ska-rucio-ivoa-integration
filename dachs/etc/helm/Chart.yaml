@@ -1,0 +1,9 @@
+name: rucio-ivoa-integration-dachs
+description: A chart for the deployment of dachs in rucio-ivoa-integration
+version: 1.1.1
+apiVersion: v1
+keywords:
+  - etc/helm
+sources:
+home:
+

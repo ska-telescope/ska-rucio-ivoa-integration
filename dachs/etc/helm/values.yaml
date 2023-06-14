@@ -1,0 +1,15 @@
+image:
+  repository: registry.gitlab.com/ska-telescope/src/ska-rucio-ivoa-integration/dachs
+  tag: latest
+  pullPolicy: Always
+
+deployment:
+  namespace: rucio-ivoa-integration
+
+svc:
+  dachs:
+    gavorc_server_url: https://ivoa.dachs.srcdev.skao.int:443
+    gavorc_server_port: 443
+    dachs_postgres_host: postgres-metadata-postgresql
+    dachs_postgres_dbname: metadata
+
