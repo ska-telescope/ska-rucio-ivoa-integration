@@ -1,0 +1,16 @@
+image:
+  repository: registry.gitlab.com/ska-telescope/src/ska-rucio-ivoa-integration/postgres-metadata
+  tag: dachs
+  pullPolicy: Always
+
+auth:
+  username: metadata
+  password: secret
+  database: metadata
+  existingSecret: null
+
+primary:
+  persistence:
+    enabled: true
+    storageClass: csi-cinder-sc-retain
+    size: 250Gi
