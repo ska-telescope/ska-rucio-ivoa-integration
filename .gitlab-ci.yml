@@ -1,0 +1,31 @@
+image: docker:git
+services:
+- docker:dind
+
+stages:
+- build
+- helm-publish
+
+build:
+  only:
+    - main
+  stage: build
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE/dachs:latest dachs
+    - docker push $CI_REGISTRY_IMAGE/dachs:latest
+
+#helm-publish:
+#  only:
+#    - main
+#  stage: helm-publish
+#  image:
+#    name: alpine/helm:latest
+#    entrypoint: [""]
+#  script:
+#    - helm repo add --username $CI_REGISTRY_USER --password $CI_REGISTRY_PASSWORD repo https://gitlab.com/api/v4/projects/39270741/packages/helm/stable
+#    - helm package etc/helm
+#    - export CHART_NAME=`ls | grep rucio-task-manager*.tgz`
+#    - helm plugin install https://github.com/chartmuseum/helm-push
+#    - helm cm-push `ls | grep rucio-task-manager*.tgz` repo
+
