@@ -1,5 +1,6 @@
 image:
-  repository: registry.gitlab.com/ska-telescope/src/ska-rucio-ivoa-integration/postgres-metadata
+  registry: registry.gitlab.com
+  repository: ska-telescope/src/ska-rucio-ivoa-integration/postgres-metadata
   tag: dachs
   pullPolicy: Always
 
