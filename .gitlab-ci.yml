@@ -14,6 +14,8 @@ build:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker build -t $CI_REGISTRY_IMAGE/dachs:latest dachs
     - docker push $CI_REGISTRY_IMAGE/dachs:latest
+    - docker build -t $CI_REGISTRY_IMAGE/postgres-metadata:latest
+    - docker push $CI_REGISTRY_IMAGE/postgres-metadata:latest
 
 #helm-publish:
 #  only:

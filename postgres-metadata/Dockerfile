@@ -1,9 +1,13 @@
-FROM postgres:14.5
+FROM bitnami/postgresql:13.11.0
 
 # this is relative to etc/init/ and defines database initialisation scripts
 ARG POSTGRES_INIT_DIR
 
-RUN apt-get update -y && apt-get install -y wget cmake postgresql-server-dev-14 postgresql-14-pgsphere postgresql-14-q3c
+USER root
+
+RUN apt-get update -y && apt-get install -y wget cmake postgresql-server-dev-13 postgresql-13-pgsphere postgresql-13-q3c
+
+USER postgres
 
 #RUN wget -qO- https://github.com/akorotkov/pgsphere/archive/master.tar.gz | tar xvz
 #RUN (cd pgsphere-master && make CFLAGS=-std=c99 USE_PGXS=1 PG_CONFIG=/usr/bin/pg_config)
