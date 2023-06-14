@@ -20,7 +20,7 @@ services:
     image: postgres-metadata:14
     build:
       context: ./postgres-metadata
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.postgres
     ports:
       - 5432:5432
     environment:

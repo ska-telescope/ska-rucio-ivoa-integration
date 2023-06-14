@@ -1,0 +1,19 @@
+FROM postgres:13.11
+
+# this is relative to etc/init/ and defines database initialisation scripts
+ARG POSTGRES_INIT_DIR
+
+USER root
+
+RUN apt-get update -y && apt-get install -y wget cmake postgresql-server-dev-13 postgresql-13-pgsphere postgresql-13-q3c
+
+USER postgres
+
+#RUN wget -qO- https://github.com/akorotkov/pgsphere/archive/master.tar.gz | tar xvz
+#RUN (cd pgsphere-master && make CFLAGS=-std=c99 USE_PGXS=1 PG_CONFIG=/usr/bin/pg_config)
+#RUN (cd pgsphere-master && make CFLAGS=-std=c99 USE_PGXS=1 PG_CONFIG=/usr/bin/pg_config install)
+
+COPY etc/postgres/postgresql.conf /etc/postgresql/postgresql.conf
+COPY etc/postgres/pg_hba.conf /etc/postgresql/pg_hba.conf
+
+COPY etc/init/$POSTGRES_INIT_DIR/* /docker-entrypoint-initdb.d/
