@@ -10,6 +10,6 @@ svc:
   dachs:
     gavorc_server_url: https://ivoa.dachs.srcdev.skao.int:443
     gavorc_server_port: 443
-    dachs_postgres_host: postgres-metadata-postgresql
+    dachs_postgres_host: postgres-metadata-postgresql.rucio.svc.cluster.local
     dachs_postgres_dbname: metadata
 
