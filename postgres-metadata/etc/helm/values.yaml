@@ -11,7 +11,16 @@ auth:
   existingSecret: null
 
 primary:
+  pgHbaConfiguration: |-
+    local   all             all                                     trust
+    host    all             all             127.0.0.1/32            trust
+    host    all             all             ::1/128                 trust
+    # Allow all operations within docker network
+    host  all  all  10.0.0.0/8  trust
+    # Allow all operations within minikube
+    host  all  all  172.0.0.0/8  trust
+    host all all all scram-sha-256
   persistence:
-    enabled: false
-    storageClass: default
-    size: 1Gi
+    enabled: true
+    storageClass: csi-cinder-sc-retain
+    size: 250Gi
