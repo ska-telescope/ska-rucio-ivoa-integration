@@ -7,6 +7,13 @@ USER root
 
 RUN apt-get update -y && apt-get install -y wget cmake postgresql-server-dev-13 postgresql-13-pgsphere postgresql-13-q3c
 
+RUN cp /usr/share/postgresql/13/extension/pg_sphere* /opt/bitnami/postgresql/share/extension \
+    && cp /usr/share/postgresql/13/extension/q3c* /opt/bitnami/postgresql/share/extension \ 
+    && cp /usr/lib/postgresql/13/lib/pg_sphere.so /opt/bitnami/postgresql/lib/ \ 
+    && cp /usr/lib/postgresql/13/lib/q3c.so /opt/bitnami/postgresql/lib/ \
+    && chmod +x /opt/bitnami/postgresql/lib/pg_sphere.so \
+    && chmod +x /opt/bitnami/postgresql/lib/q3c.so
+
 USER postgres
 
 #RUN wget -qO- https://github.com/akorotkov/pgsphere/archive/master.tar.gz | tar xvz
@@ -14,6 +21,7 @@ USER postgres
 #RUN (cd pgsphere-master && make CFLAGS=-std=c99 USE_PGXS=1 PG_CONFIG=/usr/bin/pg_config install)
 
 COPY etc/postgres/postgresql.conf /bitnami/postgresql/conf/postgresql.conf
-COPY etc/postgres/pg_hba.conf /bitnami/postgresql/conf/pg_hba.conf
+# pg_hba.conf location defined in postgresql.conf
+COPY etc/postgres/pg_hba.conf /etc/postgresql/pg_hba.conf
 
 COPY etc/init/$POSTGRES_INIT_DIR/* /docker-entrypoint-initdb.d/

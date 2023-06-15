@@ -12,6 +12,6 @@ auth:
 
 primary:
   persistence:
-    enabled: true
-    storageClass: csi-cinder-sc-retain
-    size: 250Gi
+    enabled: false
+    storageClass: default
+    size: 1Gi
