@@ -17,14 +17,14 @@ spec:
       containers:
       - env:
         - name: GAVORC_SERVER_URL
-          value: {{ .Values.svc.dachs.gavorc_server_url }}
+          value: "{{ .Values.svc.dachs.gavorc_server_url }}"
         - name: GAVORC_SERVER_PORT
-          value: {{ .Values.svc.dachs.gavorc_server_port }}
+          value: "{{ .Values.svc.dachs.gavorc_server_port }}"
         - name: DACHS_POSTGRES_HOST
-          value: {{ .Values.svc.dachs.dachs_postgres_host }}
+          value: "{{ .Values.svc.dachs.dachs_postgres_host }}"
         - name: DACHS_POSTGRES_DBNAME
-          value: {{ .Values.svc.dachs.dachs_postgres_dbname }}
-        image: {{ .Values.image.repository }}/dachs:{{ .Values.image.tag }}
+          value: "{{ .Values.svc.dachs.dachs_postgres_dbname }}"
+        image: {{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: dachs
         ports:

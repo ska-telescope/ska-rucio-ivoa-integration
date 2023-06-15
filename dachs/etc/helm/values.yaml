@@ -1,5 +1,6 @@
 image:
-  repository: registry.gitlab.com/ska-telescope/src/ska-rucio-ivoa-integration/dachs
+  repository: registry.gitlab.com/ska-telescope/src/ska-rucio-ivoa-integration
+  name: dachs
   tag: latest
   pullPolicy: Always
 
