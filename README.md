@@ -11,7 +11,7 @@ Two IVOA implementations are currently supported, but with varying degrees of fu
 - the [TAP library from CDS]((http://cdsportal.u-strasbg.fr/taptuto/index.html)), and
 - [DaCHS](https://docs.g-vo.org/DaCHS/)
 
-The full stack comprises six microservices, a combination of which need to be run for each stack. That is to say, **one** IVOA service provider, which is either
+The full stack comprises five microservices, a combination of which need to be run for each stack. That is to say, **one** IVOA service provider, which is either
 
 - an instance of Apache Tomcat running the CDS Tap library servlet (`tomcat-tap`), **or**
 - an instance of DaCHS (`dachs`)
@@ -20,12 +20,11 @@ and a set of common services, most of which are optional and depend on what func
 
 1. an instance of postgres with the [pgSphere](https://pgsphere.github.io/) extension enabled and necessary schema (`postgres-metadata`), 
 2. (optional) an instance of jupyterlab with notebooks demonstrating how to interact with these IVOA services using [pyvo](https://pypi.org/project/pyvo/) (`jupyter`),
-3. (optional) a pgadmin4 instance connected with preopopulated parameters for the postgres backend (sandbox only), and
-4. (optional) a [Datalink](https://www.ivoa.net/documents/DataLink/) service that can be used to return an IVOA compliant `VOTable` describing the location of the nearest Rucio replica for a given DID. Note that the datalink service has only been tested with the DaCHS implementation, and is not currently sandboxable.
+3. (optional, DaCHS only) a [Datalink](https://www.ivoa.net/documents/DataLink/) service that can be used to return an IVOA compliant `VOTable` describing the location of the nearest Rucio replica for a given DID. Note that the datalink service has only been tested with the DaCHS implementation.
 
 The postgres schema is dependent on which IVOA service provider is selected. As such, when building the `postgres-metadata` service it is necessary to provide the build argument `POSTGRES_INIT_DIR` which specifies the directory containing the database initialisation scripts (relative to `etc/init`).
 
-Docker compose files are available for local development and remote sandboxing. 
+Docker compose files are available for local development. Some Helm files are provided for deployment on kubernetes clusters.
 
 ## Running a TAP service
 
@@ -52,39 +51,15 @@ The function to insert/update records in the `ivoa.obscore` table is set up in s
 | jupyter-vo | 8888 | http://localhost:8888/jupyter/lab| | secret |  |
 | postgres-metadata | 5432 | | postgres | secret | database=metadata |
 
-##### Sandbox
-
-| Service | Port | Landing page | Default user | Default password | Other credentials |
-|---------|------|--------------|--------------|------------------|-------------------|
-| tomcat-tap | 8080 | http://localhost:8080/ivoa/tapserver/tap | | | |
-| jupyter-vo | 8888 | http://localhost:8888/ivoa/jupyter/lab | | secret |  |
-| postgres-metadata | 5432 | | postgres | secret | database=metadata |
-| pgadmin4 | 8889 | http://localhost:8889 | | secret | |
-
 #### Deployment
 
 ##### Local
 
-These services can be built and brought up using `docker-compose`, specifying the build argument `POSTGRES_INIT_DIR=cds`:
+These services can be built and brought up locally using `docker-compose`, specifying the build argument `POSTGRES_INIT_DIR=cds`:
 
 ```bash
 $ docker-compose build --build-arg POSTGRES_INIT_DIR=cds postgres tomcat jupyter
 $ docker-compose up tomcat jupyter postgres
-```
-
-##### Sandbox
-
-If exposing externally, remember to set:
-
-- `JUPYTER_SERVER_PASSWORD` for authentication with the jupyter notebook server,
-- `JUPYTER_SERVER_BASE_URL` if the base URL of the jupyter service is anything other than `/`, and
-- `TOMCAT_TAPSERVER_BASE_URL` if the base URL of the Tomcat TAP server service is anything other than `/tapserver`.
-
-It is possible to use docker-compose overrides to separate these variables, e.g. 
-
-```bash
-$ docker-compose -f docker-compose.yml -f docker-compose.sandbox.yml build --build-arg POSTGRES_INIT_DIR=cds postgres tomcat jupyter pgadmin
-$ docker-compose -f docker-compose.yml -f docker-compose.sandbox.yml up tomcat jupyter postgres pgadmin`
 ```
 
 ### Using the DaCHS library
@@ -112,15 +87,6 @@ Note that, unlike with the CDS deployment, both `dids` and `obscore` tables are 
 | jupyter-vo         | 8888  | http://localhost:8888/lab | secret | |
 | postgres-metadata  | 5432  | | postgres | secret | database=metadata |
 
-##### Sandbox
-
-| Service | Port | Landing page | Default user | Default password | Other credentials |
-|---------|------|--------------|--------------|------------------|------------------|
-| dachs web frontend | 8080 | http://localhost:8080/ivoa | | | |
-| dachs tap server| 8080 | http://localhost:8080/ivoa/__system__/tap/ | | | |
-| jupyter-vo | 8888 | http://localhost:8888/jupyter/lab| | secret | |
-| postgres-metadata | 5432 | | postgres | secret | database=metadata |
-
 #### Deployment
 
 Before deployment, one must decide how the existing `rucio.obscore` data is to be managed by DaCHS. There are two ways of doing this:
@@ -130,29 +96,22 @@ Before deployment, one must decide how the existing `rucio.obscore` data is to b
 
 Both of these methods are implemented as DaCHS "resource descriptors" (RDs), but both RDs cannot coexist. As such, you must first uncomment/comment the relevant lines in `etc/docker/init.sh` under "importing RDs". By default, it is set to use an externally managed table. When using an external database connection, one must reimport data when the base `rucio.obscore` table changes. This is not true with externally managed tables.
 
-##### Local
+##### Locally
 
-These services can be built and brought up using `docker-compose`, specifying the build argument `POSTGRES_INIT_DIR=dachs`:
+These services can be built and brought up locally using `docker-compose`, specifying the build argument `POSTGRES_INIT_DIR=dachs`:
 
 ```bash
 $ docker-compose build --build-arg POSTGRES_INIT_DIR=dachs postgres dachs jupyter 
 $ docker-compose up dachs jupyter postgres
 ```
 
-##### Sandbox
+##### To Kubernetes
 
-If exposing externally, remember to set:
-
-- `JUPYTER_SERVER_PASSWORD` for authentication with the jupyter notebook server,
-- `JUPYTER_SERVER_BASE_URL` if the base URL of the jupyter service is anything other than `/`, 
-- `GAVORC_SERVER_URL` with the URL for the DaCHS server, and
-- `GAVORC_SERVER_PORT` with the port of the DaCHS server
-
-It is possible to use docker-compose overrides to separate these variables, e.g. 
+The postgres metadata database and DaCHS can both be deployed to kubernetes using Helm. The postgres deployment is based off the bitnami/postgres image and uses the Bitnami chart for more easily setting up persistence etc. Note that the `pg_hba.conf` and `postgresql.conf` files in `postgres-metadata/etc/postgres` are ignored when the building the image as they get ovewritten when requesting persistence; they instead must be specified in the Helm chart values as per the Bitnami modus operandi.
 
 ```bash
-$ docker-compose -f docker-compose.yml -f docker-compose.sandbox.yml build --build-arg POSTGRES_INIT_DIR=dachs postgres dachs jupyter pgadmin
-$ docker-compose -f docker-compose.yml -f docker-compose.sandbox.yml up dachs jupyter postgres pgadmin`
+$ helm upgrade --install -n rucio-ivoa-integration dachs /path/to/dachs/helm/chart --values dachs-values.yaml
+$ helm upgrade --install postgres-metadata --namespace rucio bitnami/postgresql --values postgres-metadata-values.yaml
 ```
 
 #### Development hints
@@ -192,10 +151,6 @@ These endpoints are additional to the ones described in `Running a TAP service -
 | DaCHS SCS endpoint | 8080  | http://localhost:8080/rucio/rucio/cone/scs.xml | | | |
 | rucio-datalink     | 10000 | http://localhost:10000/links                   | | | |
 
-##### Sandbox
-
-Not implemented. See `Notes`.
-
 #### Deployment
 
 The `rucio-datalink` service requires the following additional environment variables to be set in the container, e.g. by using a `.env` file:
@@ -208,7 +163,7 @@ The OIDC client details are required for the Datalink service to talk to the Ruc
 
 A license key for GeoLite2 is required in order to geolocate a client's IP when finding the closest replica. A deployed version of the [site-directory](https://gitlab.com/ska-telescope/src/src-site-directory/-/tree/main/src/site_directory) tool is also required for this. If a license key is not set, a random storage site will be selected.
 
-##### Local
+##### Locally
 
 These services can be built and brought up using `docker-compose`, specifying the build argument `POSTGRES_INIT_DIR=dachs`:
 
@@ -217,9 +172,7 @@ $ docker-compose build --build-arg POSTGRES_INIT_DIR=dachs postgres dachs jupyte
 $ docker-compose up dachs jupyter postgres datalink
 ```
 
-##### Sandbox
-
-Not implemented. See `Notes`.
+##### To Kubernetes
 
 ## Database considerations
 
@@ -240,7 +193,6 @@ Building another table and creating triggers (3) clearly demarcates what is hand
 ## Future
 
 1. An obvious next step for this work is to build a client that abstracts the data discovery/access logic e.g. a simplified version of [astroquery](https://astroquery.readthedocs.io/en/latest)). This would also need to complemented by the population of e.g. `obscore` with appropriate access urls, as well as necessary authentication logic.
-2. The Datalink service needs to be made sandboxable. Once this is done, the Datalink service uri needs to be parameterised so that the `access_url`s for mock data written into the `obscore` table are valid for remote calls.
 
 ## Other comments
 
