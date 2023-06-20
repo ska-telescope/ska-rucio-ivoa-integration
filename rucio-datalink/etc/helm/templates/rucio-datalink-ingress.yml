@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rucio-datalink-ingress
+  namespace: {{ .Values.namespace }}
+spec:
+  rules:
+  - host: ivoa.datalink.srcdev.skao.int
+    http:
+      paths:
+      - path: /rucio
+        pathType: Prefix
+        backend:
+          service:
+            name: rucio-datalink
+            port:
+              number: {{ .Values.service.datalink.port }}
+  ingressClassName: nginx
+

@@ -1,0 +1,27 @@
+image:
+  repository: registry.gitlab.com/ska-telescope/src/ska-rucio-ivoa-integration
+  name: rucio-datalink  
+  tag: latest
+  pullPolicy: Always
+
+namespace: rucio-ivoa-integration
+
+rucioCfg:
+  host: https://rucio.srcdev.skao.int
+  authType: oidc
+  account: root
+  oidcScope: openid offline_access profile wlcg.groups
+  oidcAudience: rucio https://wlcg.cern.ch/jwt/v1/any
+
+sitedStoragesEndpoint: https://sited.srcdev.skao.int/storages/grafana
+
+ivoaAuthority: skao.src
+
+oidcAgentAuthClientCfgValue: 
+oidcAgentAuthClientCfgPassword: 
+
+geoIpLicenseKey: 
+
+service:
+  datalink:
+    port: 8080
