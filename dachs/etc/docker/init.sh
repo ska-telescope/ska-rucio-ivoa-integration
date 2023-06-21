@@ -9,6 +9,12 @@ do
 done
 echo
 
+# substitute env into gavo.rc template
+cat /tmp/gavo.rc.template | envsubst > /etc/gavo.rc
+
+# subsitute envvars into driver connection string
+cat /tmp/inputs/externaldb/data/driver.template | envsubst > /tmp/inputs/externaldb/data/driver
+
 su dachsroot -c "gavo init -d 'host=${DACHS_POSTGRES_HOST} dbname=${DACHS_POSTGRES_DBNAME}'"
 
 echo "Copying in inputs from /tmp/inputs..."
