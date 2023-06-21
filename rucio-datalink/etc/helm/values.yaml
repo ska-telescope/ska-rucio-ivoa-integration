@@ -17,11 +17,12 @@ sitedStoragesEndpoint: https://sited.srcdev.skao.int/storages/grafana
 
 ivoaAuthority: skao.src
 
-oidcAgentAuthClientCfgValue: 
-oidcAgentAuthClientCfgPassword: 
-
-geoIpLicenseKey: 
-
 service:
   datalink:
     port: 8080
+
+# Secret information, override during helm install 
+oidcAgentAuthClientCfgValue: username 
+oidcAgentAuthClientCfgPassword: password
+
+geoIpLicenseKey: secretkey

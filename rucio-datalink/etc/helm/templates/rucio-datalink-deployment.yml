@@ -34,17 +34,17 @@ spec:
         - name: OIDC_AGENT_AUTH_CLIENT_CFG_VALUE
           valueFrom:
             secretKeyRef:
-            name: {{ .Release.name }}-oidc-agent-auth-client-config
-            key: oidc-agent-auth-client-cfg-value
+              name: {{ .Release.Name }}-oidc-agent-auth-client-config
+              key: oidc-agent-auth-client-cfg-value
         - name: OIDC_AGENT_AUTH_CLIENT_CFG_PASSWORD
           valueFrom:
             secretKeyRef:
-            name: {{ .Release.name }}-oidc-agent-auth-client-config
-            key: oidc-agent-auth-client-cfg-password 
+              name: {{ .Release.Name }}-oidc-agent-auth-client-config
+              key: oidc-agent-auth-client-cfg-password 
         - name: GEOIP_LICENSE_KEY
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.name }}-geoip-license
+              name: {{ .Release.Name }}-geoip-license
               key: geoip-license-key
         image: {{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
