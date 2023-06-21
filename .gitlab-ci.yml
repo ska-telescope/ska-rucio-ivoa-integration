@@ -16,4 +16,5 @@ build:
     - docker push $CI_REGISTRY_IMAGE/dachs:latest
     - docker build -f postgres-metadata/Dockerfile.bitnami --build-arg POSTGRES_INIT_DIR=dachs -t $CI_REGISTRY_IMAGE/postgres-metadata:bitnami-dachs postgres-metadata
     - docker push $CI_REGISTRY_IMAGE/postgres-metadata:bitnami-dachs
-
+    - docker build -t $CI_REGISTRY_IMAGE/rucio-datalink:latest rucio-datalink
+    - docker push $CI_REGISTRY_IMAGE/rucio-datalink:latest
