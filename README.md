@@ -107,7 +107,7 @@ $ docker-compose up dachs jupyter postgres
 
 ##### To Kubernetes
 
-The postgres metadata database and DaCHS can both be deployed to kubernetes using Helm. The postgres deployment is based off the bitnami/postgres image and uses the Bitnami chart for more easily setting up persistence etc. Note that the `pg_hba.conf` and `postgresql.conf` files in `postgres-metadata/etc/postgres` are ignored when the building the image as they get ovewritten when requesting persistence; they instead must be specified in the Helm chart values as per the Bitnami modus operandi.
+The postgres metadata database and DaCHS can both be deployed to kubernetes using Helm. The postgres deployment is based off the bitnami/postgres image and uses the Bitnami chart for more easily setting up persistence etc. Note that the `pg_hba.conf` and `postgresql.conf` files in `postgres-metadata/etc/postgres` are ignored when the building the image as they get overwritten when requesting persistence; they instead must be specified in the Helm chart values as per the Bitnami modus operandi.
 
 ```bash
 $ helm upgrade --install -n rucio-ivoa-integration dachs /path/to/dachs/helm/chart --values dachs-values.yaml

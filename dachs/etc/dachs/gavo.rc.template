@@ -6,4 +6,4 @@ serverURL: $GAVORC_SERVER_URL
 logFormat: combined
 
 [ivoa]
-authority: test.skao
+authority: $IVOA_AUTHORITY 
