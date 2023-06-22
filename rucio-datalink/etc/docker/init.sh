@@ -69,7 +69,7 @@ fi
 cd /opt/rucio_datalink/src/rucio_datalink/rest
 
 # run server in bg
-uvicorn server:app --host "0.0.0.0" --port 10000 --reload --reload-dir ../../../etc/ --reload-include *.xml &
+uvicorn server:app --host "0.0.0.0" --port $SERVICE_DATALINK_PORT --reload --reload-dir ../../../etc/ --reload-include *.xml &
 
 # periodically get a new token
 while true; do get_token & sleep 3600; done
