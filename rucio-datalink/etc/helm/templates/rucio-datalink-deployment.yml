@@ -31,6 +31,8 @@ spec:
           value: "{{ .Values.sitedStoragesEndpoint }}"
         - name: IVOA_AUTHORITY
           value: "{{ .Values.ivoaAuthority }}"
+        - name: SERVICE_DATALINK_PORT
+          value: {{ .Values.service.datalink.port }}
         - name: OIDC_AGENT_AUTH_CLIENT_CFG_VALUE
           valueFrom:
             secretKeyRef:
