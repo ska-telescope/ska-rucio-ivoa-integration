@@ -1,3 +1,5 @@
+[![Binder](https://binderhub.srcdev.skao.int/badge_logo.svg)](https://binderhub.srcdev.skao.int/v2/gl/ska-telescope%2Fsrc%2Fska-rucio-ivoa-integration/main?labpath=binder%2Ftest_data_discovery_access_dachs_datalink.ipynb)
+
 # SKA Rucio IVOA Integration
 
 [[_TOC_]]
