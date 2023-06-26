@@ -1,1 +1,2 @@
+matplotlib==3.4.3
 pyvo==1.2
