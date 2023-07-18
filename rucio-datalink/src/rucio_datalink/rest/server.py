@@ -55,6 +55,11 @@ async def refresh_access_token() -> Union[str, HTTPException]:
     return token
 
 
+@app.get('/ping')
+async def ping(request: Request):
+    return JSONResponse('pong')
+
+
 @app.get('/links', response_class=templates.TemplateResponse)
 async def links(id, request: Request, client_ip_address: str = None, sort: str = 'nearest_by_client',
                 ranking: int = 0, token=Depends(refresh_access_token)) -> Union[templates.TemplateResponse, HTTPException]:
