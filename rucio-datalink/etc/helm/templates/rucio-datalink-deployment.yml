@@ -54,4 +54,8 @@ spec:
         ports:
         - containerPort: {{ .Values.service.datalink.port }}
         resources: {}
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 8080
       restartPolicy: Always
