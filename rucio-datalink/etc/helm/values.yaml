@@ -15,7 +15,7 @@ rucioCfg:
 
 sitedStoragesEndpoint: https://sited.srcdev.skao.int
 
-ivoaAuthority: skao.src
+ivoaAuthority: auth.example.org/datasets/fits
 
 service:
   datalink:

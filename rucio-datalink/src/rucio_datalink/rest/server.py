@@ -146,6 +146,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
             details = "No replicas found for this DID."
         raise HTTPException(status.HTTP_404_NOT_FOUND, details)
 
+    # FIXME: some of this should has been abstracted into the datalake api
     # Get a replica depending on the sort algorithm.
     #
     selected_rse = None
