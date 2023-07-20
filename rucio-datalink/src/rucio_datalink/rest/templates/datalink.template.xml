@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VOTABLE xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.4">
+    <RESOURCE type="results">
+        <TABLE>
+            <FIELD name="ID" datatype="char" arraysize="*" ucd="meta.id;meta.main" />
+            <FIELD name="access_url" datatype="char" arraysize="*" ucd="meta.ref.url" />
+            <FIELD name="service_def" datatype="char" arraysize="*" ucd="meta.ref" />
+            <FIELD name="error_message" datatype="char" arraysize="*" ucd="meta.code.error" />
+            <FIELD name="semantics" datatype="char" arraysize="*" ucd="meta.code" />
+            <FIELD name="description" datatype="char" arraysize="*" ucd="meta.note" />
+            <FIELD name="content_type" datatype="char" arraysize="*" ucd="meta.code.mime" />
+            <FIELD name="content_length" datatype="long" ucd="phys.size;meta.file" unit="byte" />
+            <FIELD name="content_qualifier" datatype="char" arraysize="*" ucd="meta.code" />
+            <DATA>
+                <TABLEDATA>
+                    <TR>
+                        <TD>ivo://{{ ivoa_authority }}/~?{{ path_on_storage }}</TD>
+                        <TD>{{ access_url }}</TD>
+                        <TD />
+                        <TD />
+                        <TD>#this</TD>
+                        <TD>{{ description }}</TD>
+                        <TD>{{ content_type }}</TD>
+                        <TD>{{ content_length }}</TD>
+                        <TD />
+                    </TR>
+                    {% if include_soda %}
+                        <TR>
+                            <TD>ivo://{{ ivoa_authority }}/~?{{ path_on_storage }}</TD>
+                            <TD />
+                            <TD>soda-sync</TD>
+                            <TD />
+                            <TD>#cutout</TD>
+                            <TD>SODA-sync cutout of ivo://{{ ivoa_authority }}/~?{{ path_on_storage }}</TD>
+                            <TD>{{ content_type }}</TD>
+                            <TD />
+                            <TD />
+                        </TR>
+                        <TR>
+                            <TD>ivo://{{ ivoa_authority }}/~?{{ path_on_storage }}</TD>
+                            <TD />
+                            <TD>soda-async</TD>
+                            <TD />
+                            <TD>#cutout</TD>
+                            <TD>SODA-async cutout of ivo://{{ ivoa_authority }}/~?{{ path_on_storage }}</TD>
+                            <TD>{{ content_type }}</TD>
+                            <TD />
+                            <TD />
+                        </TR>
+                    {% endif %}
+                </TABLEDATA>
+            </DATA>
+        </TABLE>
+    </RESOURCE>
+    {% if include_soda %}
+        <RESOURCE type="meta" ID="soda-sync" utype="adhoc:service">
+            <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ soda_resource_identifier | length }}"  value="{{ soda_resource_identifier }}" />
+            <PARAM name="accessURL" datatype="char" arraysize="{{ soda_access_url | length }}" value="{{ soda_access_url }}" />
+            <GROUP name="inputParams">
+                <PARAM name="ID" datatype="char" arraysize="{{ ('ivo://' ~ ivoa_authority ~ '/~?' ~ path_on_storage) | length }}" ucd="meta.id;meta.dataset" value="ivo://{{ ivoa_authority }}/~?{{ path_on_storage }}" />
+            </GROUP>
+        </RESOURCE>
+    {% endif %}
+</VOTABLE>

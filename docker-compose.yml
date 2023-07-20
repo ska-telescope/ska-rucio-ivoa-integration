@@ -72,8 +72,9 @@ services:
       - RUCIO_CFG_ACCOUNT=root
       - RUCIO_CFG_OIDC_SCOPE=openid offline_access profile wlcg.groups
       - RUCIO_CFG_OIDC_AUDIENCE=rucio https://wlcg.cern.ch/jwt/v1/any
-      - SITED_STORAGES_ENDPOINT_JSON=https://sited.srcdev.skao.int/storages/grafana
-      - IVOA_AUTHORITY=test.skao
+      - SITED_STORAGES_ENDPOINT=https://sited.srcdev.skao.int
+      - SERVICE_DATALINK_PORT=10000
+      - IVOA_AUTHORITY=skao.src
     env_file:
       - .env
     ports:

@@ -13,7 +13,7 @@ rucioCfg:
   oidcScope: openid offline_access profile wlcg.groups
   oidcAudience: rucio https://wlcg.cern.ch/jwt/v1/any
 
-sitedStoragesEndpoint: https://sited.srcdev.skao.int/storages/grafana
+sitedStoragesEndpoint: https://sited.srcdev.skao.int
 
 ivoaAuthority: skao.src
 

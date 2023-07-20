@@ -27,7 +27,7 @@ spec:
           value: "{{ .Values.rucioCfg.oidcScope }}"
         - name: RUCIO_CFG_OIDC_AUDIENCE
           value: "{{ .Values.rucioCfg.oidcAudience }}"
-        - name: SITED_STORAGES_ENDPOINT_JSON
+        - name: SITED_STORAGES_ENDPOINT
           value: "{{ .Values.sitedStoragesEndpoint }}"
         - name: IVOA_AUTHORITY
           value: "{{ .Values.ivoaAuthority }}"
@@ -54,4 +54,8 @@ spec:
         ports:
         - containerPort: {{ .Values.service.datalink.port }}
         resources: {}
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 8080
       restartPolicy: Always

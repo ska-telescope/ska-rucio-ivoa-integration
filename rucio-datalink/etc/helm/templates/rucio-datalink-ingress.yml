@@ -3,12 +3,13 @@ kind: Ingress
 metadata:
   name: rucio-datalink-ingress
   namespace: {{ .Values.namespace }}
+  nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
   - host: ivoa.datalink.srcdev.skao.int
     http:
       paths:
-      - path: /rucio
+      - path: /rucio(/|$)(.*)
         pathType: Prefix
         backend:
           service:
