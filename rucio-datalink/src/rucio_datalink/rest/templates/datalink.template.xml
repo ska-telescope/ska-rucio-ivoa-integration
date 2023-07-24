@@ -14,7 +14,7 @@
             <DATA>
                 <TABLEDATA>
                     <TR>
-                        <TD>ivo://{{ ivoa_authority }}/?{{ path_on_storage }}</TD>
+                        <TD>ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
                         <TD>{{ access_url }}</TD>
                         <TD />
                         <TD />
@@ -25,40 +25,47 @@
                         <TD />
                     </TR>
                     {% if include_soda %}
-                        <TR>
-                            <TD>ivo://{{ ivoa_authority }}/?{{ path_on_storage }}</TD>
-                            <TD />
-                            <TD>soda-sync</TD>
-                            <TD />
-                            <TD>#cutout</TD>
-                            <TD>SODA-sync cutout of ivo://{{ ivoa_authority }}/?{{ path_on_storage }}</TD>
-                            <TD>{{ content_type }}</TD>
-                            <TD />
-                            <TD />
-                        </TR>
-                        <TR>
-                            <TD>ivo://{{ ivoa_authority }}/?{{ path_on_storage }}</TD>
-                            <TD />
-                            <TD>soda-async</TD>
-                            <TD />
-                            <TD>#cutout</TD>
-                            <TD>SODA-async cutout of ivo://{{ ivoa_authority }}/?{{ path_on_storage }}</TD>
-                            <TD>{{ content_type }}</TD>
-                            <TD />
-                            <TD />
-                        </TR>
+                    <TR>
+                        <TD>ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
+                        <TD />
+                        <TD>soda-sync</TD>
+                        <TD />
+                        <TD>#cutout</TD>
+                        <TD>SODA-sync cutout of ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
+                        <TD>{{ content_type }}</TD>
+                        <TD />
+                        <TD />
+                    </TR>
+                    <TR>
+                        <TD>ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
+                        <TD />
+                        <TD>soda-async</TD>
+                        <TD />
+                        <TD>#cutout</TD>
+                        <TD>SODA-async cutout of ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
+                        <TD>{{ content_type }}</TD>
+                        <TD />
+                        <TD />
+                    </TR>
                     {% endif %}
                 </TABLEDATA>
             </DATA>
         </TABLE>
     </RESOURCE>
     {% if include_soda %}
-        <RESOURCE type="meta" ID="soda-sync" utype="adhoc:service">
-            <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ soda_resource_identifier | length }}"  value="{{ soda_resource_identifier }}" />
-            <PARAM name="accessURL" datatype="char" arraysize="{{ soda_access_url | length }}" value="{{ soda_access_url }}" />
-            <GROUP name="inputParams">
-                <PARAM name="ID" datatype="char" arraysize="{{ ('ivo://' ~ ivoa_authority ~ '?' ~ path_on_storage) | length }}" ucd="meta.id;meta.dataset" value="ivo://{{ ivoa_authority }}?{{ path_on_storage }}" />
-            </GROUP>
-        </RESOURCE>
+    <RESOURCE type="meta" ID="soda-sync" utype="adhoc:service">
+        <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ soda_sync_resource_identifier | length }}"  value="{{ soda_sync_resource_identifier }}" />
+        <PARAM name="accessURL" datatype="char" arraysize="{{ soda_sync_access_url | length }}" value="{{ soda_sync_access_url }}" />
+        <GROUP name="inputParams">
+            <PARAM name="ID" datatype="char" arraysize="{{ ('ivo://' ~ ivoa_authority ~ '?' ~ path_on_storage) | length }}" ucd="meta.id;meta.dataset" value="ivo://{{ ivoa_authority }}?{{ path_on_storage }}" />
+        </GROUP>
+    </RESOURCE>
+    <RESOURCE type="meta" ID="soda-async" utype="adhoc:service">
+        <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ soda_async_resource_identifier | length }}"  value="{{ soda_async_resource_identifier }}" />
+        <PARAM name="accessURL" datatype="char" arraysize="{{ soda_async_access_url | length }}" value="{{ soda_async_access_url }}" />
+        <GROUP name="inputParams">
+            <PARAM name="ID" datatype="char" arraysize="{{ ('ivo://' ~ ivoa_authority ~ '?' ~ path_on_storage) | length }}" ucd="meta.id;meta.dataset" value="ivo://{{ ivoa_authority }}?{{ path_on_storage }}" />
+        </GROUP>
+    </RESOURCE>
     {% endif %}
 </VOTABLE>

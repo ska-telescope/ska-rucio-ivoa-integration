@@ -119,7 +119,8 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
 
     # Refine replicas based on SODA service availability, if requested.
     #
-    soda_services_by_rse = OrderedDict()
+    soda_sync_services_by_rse = OrderedDict()
+    soda_async_services_by_rse = OrderedDict()
     if must_include_soda:
         # Get a list of SODA services per RSE.
         #
@@ -131,12 +132,22 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
                 for service in site['services']:
                     if service['type'] == 'Rucio Storage Element (RSE)' and \
                             service['identifier'] == rse:
+                        # sync
                         for _service in site['services']:
-                            if _service['type'] == 'SODA':
-                                if not soda_services_by_rse.get(rse, None):
-                                    soda_services_by_rse[rse] = []
-                                soda_services_by_rse[rse].append(_service)
-        for site in set(replicas_by_rse.keys()) - set(soda_services_by_rse.keys()):
+                            if _service['type'] == 'SODA (sync)':
+                                if not soda_sync_services_by_rse.get(rse, None):
+                                    soda_sync_services_by_rse[rse] = []
+                                soda_sync_services_by_rse[rse].append(_service)
+                        # async
+                        for _service in site['services']:
+                            if _service['type'] == 'SODA (async)':
+                                if not soda_async_services_by_rse.get(rse, None):
+                                    soda_async_services_by_rse[rse] = []
+                                soda_async_services_by_rse[rse].append(_service)
+        # remove sites with no SODA services (both sync and async)
+        for site in set(replicas_by_rse.keys()) - \
+                    set(soda_sync_services_by_rse.keys()) - \
+                    set(soda_async_services_by_rse.keys()):
             replicas_by_rse.pop(site)
 
     if not replicas_by_rse:
@@ -175,9 +186,11 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "sort algorithm not understood.")
 
     access_url = selected_rse_replica
-    soda_service = {}
+    soda_sync_service = {}
+    soda_async_service = {}
     if must_include_soda:
-        soda_service = random.choice(soda_services_by_rse[selected_rse])
+        soda_sync_service = random.choice(soda_sync_services_by_rse[selected_rse])
+        soda_async_service = random.choice(soda_async_services_by_rse[selected_rse])
     return templates.TemplateResponse("datalink.template.xml", {
         "request": request,
         "ivoa_authority": config.get('IVOA_AUTHORITY'),
@@ -187,12 +200,22 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         "content_type": metadata.get('content_type', ''),
         "content_length": metadata.get('content_length', ''),
         "include_soda": must_include_soda,
-        "soda_resource_identifier": soda_service.get('other_attributes', {}).get('resourceIdentifier', {}).get('value', None) or '',    # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
-        "soda_access_url": "{}://{}:{}/{}".format(
-            soda_service.get('prefix', ''),
-            soda_service.get('host', ''),
-            soda_service.get('port', ''),
-            soda_service.get('path', '').lstrip('/')
+        "soda_sync_resource_identifier": soda_sync_service.get('other_attributes', {}).get(
+            'resourceIdentifier', {}).get('value', None) or '',    # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
+        "soda_sync_access_url": "{}://{}:{}/{}".format(
+            soda_sync_service.get('prefix', ''),
+            soda_sync_service.get('host', ''),
+            soda_sync_service.get('port', ''),
+            soda_sync_service.get('path', '').lstrip('/')
+        ),
+        "soda_async_resource_identifier": soda_async_service.get('other_attributes', {}).get(
+            'resourceIdentifier', {}).get('value', None) or '',
+        # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
+        "soda_async_access_url": "{}://{}:{}/{}".format(
+            soda_async_service.get('prefix', ''),
+            soda_async_service.get('host', ''),
+            soda_async_service.get('port', ''),
+            soda_async_service.get('path', '').lstrip('/')
         )
     }, media_type="application/xml")
 
