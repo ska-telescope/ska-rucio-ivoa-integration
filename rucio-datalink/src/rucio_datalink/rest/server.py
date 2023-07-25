@@ -169,7 +169,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         if not geoip_reader or not rses:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "nearest_by_client not supported.")
         if not client_ip_address:
-            client_ip_address = request.client.host
+            client_ip_address = request.headers.get('x-real-ip', '')
         try:
             response = geoip_reader.city(client_ip_address)
             client_location = (response.location.latitude, response.location.longitude)
@@ -209,8 +209,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
             soda_sync_service.get('path', '').lstrip('/')
         ),
         "soda_async_resource_identifier": soda_async_service.get('other_attributes', {}).get(
-            'resourceIdentifier', {}).get('value', None) or '',
-        # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
+            'resourceIdentifier', {}).get('value', None) or '',     # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
         "soda_async_access_url": "{}://{}:{}/{}".format(
             soda_async_service.get('prefix', ''),
             soda_async_service.get('host', ''),
