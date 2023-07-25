@@ -169,6 +169,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         if not geoip_reader or not rses:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "nearest_by_client not supported.")
         if not client_ip_address:
+            # requires use-forwarded-headers: 'true' in nginx-ingress cmap
             client_ip_address = request.headers.get('x-real-ip', '')
         try:
             response = geoip_reader.city(client_ip_address)
@@ -181,7 +182,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
             selected_rse = sorted(distances_by_rse, key=distances_by_rse.get)[ranking]
             selected_rse_replica = random.choice(replicas_by_rse[selected_rse])
         except geoip2.errors.AddressNotFoundError:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, "client ip addressed could not be geolocated.")
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "client ip address could not be geolocated.")
     else:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "sort algorithm not understood.")
 
