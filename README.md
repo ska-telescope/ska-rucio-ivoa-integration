@@ -1,4 +1,5 @@
-[![Binder](https://binderhub.srcdev.skao.int/badge_logo.svg)](https://binderhub.srcdev.skao.int/v2/gl/ska-telescope%2Fsrc%2Fska-rucio-ivoa-integration/main?labpath=binder%2Ftest_data_discovery_access_dachs_datalink.ipynb)
+[![Binder](https://binderhub.srcdev.skao.int/badge_logo.svg?key_text=Data+Access)](https://binderhub.srcdev.skao.int/v2/gl/ska-telescope%2Fsrc%2Fska-rucio-ivoa-integration/main?labpath=binder%2Ftest_data_discovery_access_dachs_datalink.ipynb)
+[![Binder](https://binderhub.srcdev.skao.int/badge_logo.svg?key_text=SODA+Cutouts)](https://binderhub.srcdev.skao.int/v2/gl/ska-telescope%2Fsrc%2Fska-rucio-ivoa-integration/main?labpath=binder%2Ftest_data_discovery_access_dachs_datalink_cutout.ipynb)
 
 # SKA Rucio IVOA Integration
 
