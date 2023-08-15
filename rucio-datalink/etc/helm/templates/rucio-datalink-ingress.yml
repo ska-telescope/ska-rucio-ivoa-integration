@@ -16,5 +16,16 @@ spec:
             name: rucio-datalink
             port:
               number: {{ .Values.service.datalink.port }}
+  - host: datalink.ivoa.srcdev.skao.int
+    http:
+      paths:
+      - path: /rucio(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: rucio-datalink
+            port:
+              number: {{ .Values.service.datalink.port }}
   ingressClassName: nginx
+
 
