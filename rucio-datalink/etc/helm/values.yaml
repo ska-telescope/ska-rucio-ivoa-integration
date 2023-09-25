@@ -13,7 +13,10 @@ rucioCfg:
   oidcScope: openid offline_access profile wlcg.groups
   oidcAudience: rucio https://wlcg.cern.ch/jwt/v1/any
 
-sitedStoragesEndpoint: https://sited.srcdev.skao.int
+siteCapabilitiesEndpoint: https://site-capabilities.srcdev.skao.int/api/v1
+siteCapabilitiesClientId: 1f901a38-955f-4198-aedb-002332a3c551
+siteCapabilitiesClientScopes: openid profile site-capabilities-api-service
+siteCapabilitiesClientAudience: site-capabilities-api
 
 ivoaAuthority: auth.example.org/datasets/fits
 
@@ -24,5 +27,7 @@ service:
 # Secret information, override during helm install 
 oidcAgentAuthClientCfgValue: username 
 oidcAgentAuthClientCfgPassword: password
+siteCapabilitiesClientSecret: password
+
 
 geoIpLicenseKey: secretkey

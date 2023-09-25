@@ -72,7 +72,10 @@ services:
       - RUCIO_CFG_ACCOUNT=root
       - RUCIO_CFG_OIDC_SCOPE=openid offline_access profile wlcg.groups
       - RUCIO_CFG_OIDC_AUDIENCE=rucio https://wlcg.cern.ch/jwt/v1/any
-      - SITED_STORAGES_ENDPOINT=https://sited.srcdev.skao.int
+      - SITE_CAPABILITIES_CLIENT_ID=1f901a38-955f-4198-aedb-002332a3c551
+      - SITE_CAPABILITIES_CLIENT_SCOPES=openid profile site-capabilities-api-service
+      - SITE_CAPABILITIES_CLIENT_AUDIENCE=site-capabilities-api
+      - SITE_CAPABILITIES_ENDPOINT=https://site-capabilities.srcdev.skao.int/api/v1
       - SERVICE_DATALINK_PORT=10000
       - IVOA_AUTHORITY=auth.example.org/datasets/fits
     env_file:

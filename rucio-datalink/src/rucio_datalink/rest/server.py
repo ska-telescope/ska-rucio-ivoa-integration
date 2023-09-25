@@ -3,9 +3,10 @@ import logging
 import json
 import random
 import requests
-from typing import Union
+from typing import Union, Optional
 import urllib.parse
 
+from authlib.integrations.requests_client import OAuth2Session
 from fastapi import FastAPI, Depends, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
@@ -30,6 +31,13 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+# Instantiate an OAuth2 request session for the data-management-api, site-capabilities-api and rucio-admin clients.
+#
+SITE_CAPABILITIES_CLIENT = OAuth2Session(config.get("SITE_CAPABILITIES_CLIENT_ID"),
+                                         config.get("SITE_CAPABILITIES_CLIENT_SECRET"),
+                                         scope=config.get("SITE_CAPABILITIES_CLIENT_SCOPES", default=""))
+
+
 templates = Jinja2Templates(directory="templates")
 
 # Instantiate geoip reader if GEOIP_LICENSE_KEY is set in environment
@@ -38,19 +46,6 @@ geoip_reader = None
 if config.get("GEOIP_LICENSE_KEY", default=None):
     geoip_reader = geoip2.database.Reader(config.get('GEOIP_DATABASE_PATH'))
 
-# FIXME: needs to update periodically, but don't want to hammer the api
-# Query sited for list of storage lat/longs and services
-#
-rses = None
-services = None
-if config.get("SITED_STORAGES_ENDPOINT", default=None):
-    response = requests.get("{}/storages/grafana".format(config.get('SITED_STORAGES_ENDPOINT')))
-    content = response.content.decode('utf-8')
-    rses = json.loads(content)
-
-    response = requests.get("{}/services".format(config.get('SITED_STORAGES_ENDPOINT')))
-    content = response.content.decode('utf-8')
-    services_by_site = json.loads(content)
 
 # Dependency to refresh access token if necessary.
 def refresh_access_token() -> Union[str, HTTPException]:
@@ -59,6 +54,64 @@ def refresh_access_token() -> Union[str, HTTPException]:
     except agent.OidcAgentError as e:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Error getting token: {}".format(e))
     return token
+
+
+# A service token is used to get client_credentials access to other APIs.
+class ServiceToken:
+    def __init__(self, default_scopes, audience, client, iam_token_endpoint, additional_scopes: Optional[str] = None):
+        self.default_scopes = default_scopes
+        self.audience = audience
+        self.client = client
+        self.iam_token_endpoint = iam_token_endpoint
+        self.additional_scopes = additional_scopes
+
+    def get_token(self):
+        additional_scopes = self.additional_scopes if self.additional_scopes else ''
+        scopes = "{} {}".format(self.default_scopes, additional_scopes)
+
+        token = None
+        try:
+            token = self.client.fetch_token(
+                self.iam_token_endpoint,
+                grant_type="client_credentials",
+                audience=self.audience,
+                scope=scopes
+            )
+        except Exception as e:
+            raise Exception(repr(e))
+        return token.get('access_token')
+
+
+# A site capabilities service token.
+#
+class SiteCapabilitiesServiceToken(ServiceToken):
+    def __init__(self, additional_scopes: Optional[str] = None):
+        super().__init__(
+            default_scopes=config.get("SITE_CAPABILITIES_CLIENT_SCOPES"),
+            audience=config.get("SITE_CAPABILITIES_CLIENT_AUDIENCE"),
+            client=SITE_CAPABILITIES_CLIENT,
+            iam_token_endpoint="https://ska-iam.stfc.ac.uk/token",
+            additional_scopes=additional_scopes,
+        )
+
+
+# FIXME: needs to update periodically, but don't want to hammer the api
+# Query site-capabilities for list of storage lat/longs and services
+#
+rses = None
+services = None
+if config.get("SITE_CAPABILITIES_ENDPOINT", default=None):
+    client = SiteCapabilitiesServiceToken()
+    sc_token = client.get_token()
+    response = requests.get("{}/storages/grafana".format(config.get('SITE_CAPABILITIES_ENDPOINT')),
+                            headers={"Authorization": "Bearer {}".format(sc_token)})
+    content = response.content.decode('utf-8')
+    rses = json.loads(content)
+
+    response = requests.get("{}/services".format(config.get('SITE_CAPABILITIES_ENDPOINT')),
+                            headers={"Authorization": "Bearer {}".format(sc_token)})
+    content = response.content.decode('utf-8')
+    services_by_site = json.loads(content)
 
 
 @app.get('/ping')
@@ -203,19 +256,9 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         "include_soda": must_include_soda,
         "soda_sync_resource_identifier": soda_sync_service.get('other_attributes', {}).get(
             'resourceIdentifier', {}).get('value', None) or '',    # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
-        "soda_sync_access_url": "{}://{}:{}/{}".format(
-            soda_sync_service.get('prefix', ''),
-            soda_sync_service.get('host', ''),
-            soda_sync_service.get('port', ''),
-            soda_sync_service.get('path', '').lstrip('/')
-        ),
+        "soda_sync_access_url": "https://data-management.srcdev.skao.int/api/v1/data/soda/{}/{}/{}".format(soda_sync_service.get('id'), scope, name),
         "soda_async_resource_identifier": soda_async_service.get('other_attributes', {}).get(
             'resourceIdentifier', {}).get('value', None) or '',     # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
-        "soda_async_access_url": "{}://{}:{}/{}".format(
-            soda_async_service.get('prefix', ''),
-            soda_async_service.get('host', ''),
-            soda_async_service.get('port', ''),
-            soda_async_service.get('path', '').lstrip('/')
-        )
+        "soda_async_access_url": "https://data-management.srcdev.skao.int/api/v1/data/soda/{}/{}/{}".format(soda_sync_service.get('id'), scope, name),
     }, media_type="application/xml")
 

@@ -27,8 +27,14 @@ spec:
           value: "{{ .Values.rucioCfg.oidcScope }}"
         - name: RUCIO_CFG_OIDC_AUDIENCE
           value: "{{ .Values.rucioCfg.oidcAudience }}"
-        - name: SITED_STORAGES_ENDPOINT
-          value: "{{ .Values.sitedStoragesEndpoint }}"
+        - name: SITE_CAPABILITIES_ENDPOINT
+          value: "{{ .Values.siteCapabilitiesEndpoint }}"
+        - name: SITE_CAPABILITIES_CLIENT_ID
+          value: "{{ .Values.siteCapabilitiesClientId }}"
+        - name: SITE_CAPABILITIES_CLIENT_SCOPES
+          value: "{{ .Values.siteCapabilitiesClientScopes }}"
+        - name: SITE_CAPABILITIES_CLIENT_AUDIENCE
+          value: "{{ .Values.siteCapabilitiesClientAudience }}"
         - name: IVOA_AUTHORITY
           value: "{{ .Values.ivoaAuthority }}"
         - name: SERVICE_DATALINK_PORT
@@ -38,11 +44,16 @@ spec:
             secretKeyRef:
               name: {{ .Release.Name }}-oidc-agent-auth-client-config
               key: oidc-agent-auth-client-cfg-value
+        - name: SITE_CAPABILITIES_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-site-capabilities-client-config
+              key: site-capabilities-client-cfg-secret
         - name: OIDC_AGENT_AUTH_CLIENT_CFG_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-oidc-agent-auth-client-config
-              key: oidc-agent-auth-client-cfg-password 
+              key: oidc-agent-auth-client-cfg-password
         - name: GEOIP_LICENSE_KEY
           valueFrom:
             secretKeyRef:
