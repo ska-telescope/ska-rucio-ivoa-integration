@@ -1,3 +1,4 @@
+import ast
 from collections import OrderedDict
 import logging
 import json
@@ -253,6 +254,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         "description": metadata.get('obs_id', ''),
         "content_type": metadata.get('content_type', ''),
         "content_length": metadata.get('content_length', ''),
+        "datalinks": ast.literal_eval(metadata.get('datalinks', '[]')),
         "include_soda": must_include_soda,
         "soda_sync_resource_identifier": soda_sync_service.get('other_attributes', {}).get(
             'resourceIdentifier', {}).get('value', None) or '',    # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}

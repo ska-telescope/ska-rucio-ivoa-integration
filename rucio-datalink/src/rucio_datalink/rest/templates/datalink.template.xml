@@ -24,6 +24,20 @@
                         <TD>{{ content_length }}</TD>
                         <TD />
                     </TR>
+                    {% for datalink in datalinks %}
+                    <TR>
+                        <TD>ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
+                        <TD>{{ datalink.access_url }}</TD>
+                        <TD />
+                        <TD />
+                        <TD>{{ datalink.semantics }}</TD>
+                        <TD>{{ datalink.description }}</TD>
+                        <TD>application/x-votable+xml;content=datalink</TD>
+                        <TD />
+                        <TD />
+                        <TD />
+                    </TR>
+                    {% endfor %}
                     {% if include_soda %}
                     <TR>
                         <TD>ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
