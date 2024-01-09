@@ -71,6 +71,11 @@
         <PARAM name="accessURL" datatype="char" arraysize="{{ soda_sync_access_url | length }}" value="{{ soda_sync_access_url }}" />
         <GROUP name="inputParams">
             <PARAM name="ID" datatype="char" arraysize="{{ ('ivo://' ~ ivoa_authority ~ '?' ~ path_on_storage) | length }}" ucd="meta.id;meta.dataset" value="ivo://{{ ivoa_authority }}?{{ path_on_storage }}" />
+            <PARAM name="POS" datatype="char" arraysize="*" ucd="obs.field" value="" />
+            <PARAM name="CIRCLE" datatype="double" arraysize="3" ucd="obs.field" unit="deg" xtype="circle" value=""/>
+            <PARAM name="BAND" unit="m" ucd="em.wl;stat.interval" datatype="double" arraysize="2" xtype="interval" value=""/>
+            <PARAM name="TIME" unit="d" ucd="time.interval;obs.exposure" datatype="double" arraysize="2" xtype="interval" value=""/>
+            <PARAM name="POL" ucd="meta.code;phys.polarization" datatype="char" arraysize="*" value=""/>
         </GROUP>
     </RESOURCE>
     <RESOURCE type="meta" ID="soda-async" utype="adhoc:service">
@@ -78,6 +83,11 @@
         <PARAM name="accessURL" datatype="char" arraysize="{{ soda_async_access_url | length }}" value="{{ soda_async_access_url }}" />
         <GROUP name="inputParams">
             <PARAM name="ID" datatype="char" arraysize="{{ ('ivo://' ~ ivoa_authority ~ '?' ~ path_on_storage) | length }}" ucd="meta.id;meta.dataset" value="ivo://{{ ivoa_authority }}?{{ path_on_storage }}" />
+            <PARAM name="POS" datatype="char" arraysize="*" ucd="obs.field" value="" />
+            <PARAM name="CIRCLE" datatype="double" arraysize="3" ucd="obs.field" unit="deg" xtype="circle" value=""/>
+            <PARAM name="BAND" unit="m" ucd="em.wl;stat.interval" datatype="double" arraysize="2" xtype="interval" value=""/>
+            <PARAM name="TIME" unit="d" ucd="time.interval;obs.exposure" datatype="double" arraysize="2" xtype="interval" value=""/>
+            <PARAM name="POL" ucd="meta.code;phys.polarization" datatype="char" arraysize="*" value=""/>
         </GROUP>
     </RESOURCE>
     {% endif %}
