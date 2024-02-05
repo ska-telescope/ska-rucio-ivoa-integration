@@ -17,16 +17,6 @@ spec:
     spec:
       containers:
       - env:
-        - name: RUCIO_CFG_HOST
-          value: "{{ .Values.rucioCfg.host }}"
-        - name: RUCIO_CFG_AUTH_TYPE
-          value: "{{ .Values.rucioCfg.authType }}"
-        - name: RUCIO_CFG_ACCOUNT
-          value: "{{ .Values.rucioCfg.account }}"
-        - name: RUCIO_CFG_OIDC_SCOPE
-          value: "{{ .Values.rucioCfg.oidcScope }}"
-        - name: RUCIO_CFG_OIDC_AUDIENCE
-          value: "{{ .Values.rucioCfg.oidcAudience }}"
         - name: SITE_CAPABILITIES_ENDPOINT
           value: "{{ .Values.siteCapabilitiesEndpoint }}"
         - name: SITE_CAPABILITIES_CLIENT_ID
@@ -35,30 +25,28 @@ spec:
           value: "{{ .Values.siteCapabilitiesClientScopes }}"
         - name: SITE_CAPABILITIES_CLIENT_AUDIENCE
           value: "{{ .Values.siteCapabilitiesClientAudience }}"
+        - name: DATA_MANAGEMENT_ENDPOINT
+          value: "{{ .Values.dataManagementEndpoint }}"
+        - name: DATA_MANAGEMENT_CLIENT_ID
+          value: "{{ .Values.dataManagementClientId }}"
+        - name: DATA_MANAGEMENT_CLIENT_SCOPES
+          value: "{{ .Values.dataManagementClientScopes }}"
+        - name: DATA_MANAGEMENT_CLIENT_AUDIENCE
+          value: "{{ .Values.dataManagementClientAudience }}"
         - name: IVOA_AUTHORITY
           value: "{{ .Values.ivoaAuthority }}"
         - name: SERVICE_DATALINK_PORT
           value: "{{ .Values.service.datalink.port }}"
-        - name: OIDC_AGENT_AUTH_CLIENT_CFG_VALUE
+        - name: DATA_MANAGEMENT_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-oidc-agent-auth-client-config
-              key: oidc-agent-auth-client-cfg-value
+              name: {{ .Release.Name }}-data-management-client-config
+              key: data-management-client-cfg-secret
         - name: SITE_CAPABILITIES_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-site-capabilities-client-config
               key: site-capabilities-client-cfg-secret
-        - name: OIDC_AGENT_AUTH_CLIENT_CFG_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-oidc-agent-auth-client-config
-              key: oidc-agent-auth-client-cfg-password
-        - name: GEOIP_LICENSE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-geoip-license
-              key: geoip-license-key
         image: {{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: rucio-datalink

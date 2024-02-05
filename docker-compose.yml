@@ -67,11 +67,10 @@ services:
       context: ./rucio-datalink
       dockerfile: Dockerfile
     environment:
-      - RUCIO_CFG_HOST=https://rucio.srcdev.skao.int
-      - RUCIO_CFG_AUTH_TYPE=oidc
-      - RUCIO_CFG_ACCOUNT=root
-      - RUCIO_CFG_OIDC_SCOPE=openid offline_access profile wlcg.groups
-      - RUCIO_CFG_OIDC_AUDIENCE=rucio https://wlcg.cern.ch/jwt/v1/any
+      - DATA_MANAGEMENT_CLIENT_ID=0ab39d2f-5428-484b-815d-dadfbad17416
+      - DATA_MANAGEMENT_CLIENT_SCOPES=openid profile data-management-api-service
+      - DATA_MANAGEMENT_CLIENT_AUDIENCE=data-management-api
+      - DATA_MANAGEMENT_ENDPOINT=https://data-management.srcdev.skao.int/api/v1
       - SITE_CAPABILITIES_CLIENT_ID=1f901a38-955f-4198-aedb-002332a3c551
       - SITE_CAPABILITIES_CLIENT_SCOPES=openid profile site-capabilities-api-service
       - SITE_CAPABILITIES_CLIENT_AUDIENCE=site-capabilities-api

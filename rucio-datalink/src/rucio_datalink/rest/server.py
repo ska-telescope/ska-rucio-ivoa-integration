@@ -1,19 +1,14 @@
 import ast
 from collections import OrderedDict
-import logging
 import json
 import random
 import requests
 from typing import Union, Optional
-import urllib.parse
 
 from authlib.integrations.requests_client import OAuth2Session
-from fastapi import FastAPI, Depends, HTTPException, Request, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
-import geoip2.database
-from geopy.distance import great_circle
-import liboidcagent as agent
 from starlette.config import Config
 from starlette.responses import Response, HTMLResponse, JSONResponse
 
@@ -38,23 +33,11 @@ SITE_CAPABILITIES_CLIENT = OAuth2Session(config.get("SITE_CAPABILITIES_CLIENT_ID
                                          config.get("SITE_CAPABILITIES_CLIENT_SECRET"),
                                          scope=config.get("SITE_CAPABILITIES_CLIENT_SCOPES", default=""))
 
+DATA_MANAGEMENT_CLIENT = OAuth2Session(config.get("DATA_MANAGEMENT_CLIENT_ID"),
+                                         config.get("DATA_MANAGEMENT_CLIENT_SECRET"),
+                                         scope=config.get("DATA_MANAGEMENT_CLIENT_SCOPES", default=""))
 
 templates = Jinja2Templates(directory="templates")
-
-# Instantiate geoip reader if GEOIP_LICENSE_KEY is set in environment
-#
-geoip_reader = None
-if config.get("GEOIP_LICENSE_KEY", default=None):
-    geoip_reader = geoip2.database.Reader(config.get('GEOIP_DATABASE_PATH'))
-
-
-# Dependency to refresh access token if necessary.
-def refresh_access_token() -> Union[str, HTTPException]:
-    try:
-        token = agent.get_access_token(config.get('OIDC_CLIENT_NAME'))
-    except agent.OidcAgentError as e:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Error getting token: {}".format(e))
-    return token
 
 
 # A service token is used to get client_credentials access to other APIs.
@@ -96,23 +79,17 @@ class SiteCapabilitiesServiceToken(ServiceToken):
         )
 
 
-# FIXME: needs to update periodically, but don't want to hammer the api
-# Query site-capabilities for list of storage lat/longs and services
+# A data management service token.
 #
-rses = None
-services = None
-if config.get("SITE_CAPABILITIES_ENDPOINT", default=None):
-    client = SiteCapabilitiesServiceToken()
-    sc_token = client.get_token()
-    response = requests.get("{}/storages/grafana".format(config.get('SITE_CAPABILITIES_ENDPOINT')),
-                            headers={"Authorization": "Bearer {}".format(sc_token)})
-    content = response.content.decode('utf-8')
-    rses = json.loads(content)
-
-    response = requests.get("{}/services".format(config.get('SITE_CAPABILITIES_ENDPOINT')),
-                            headers={"Authorization": "Bearer {}".format(sc_token)})
-    content = response.content.decode('utf-8')
-    services_by_site = json.loads(content)
+class DataManagementServiceToken(ServiceToken):
+    def __init__(self, additional_scopes: Optional[str] = None):
+        super().__init__(
+            default_scopes=config.get("DATA_MANAGEMENT_CLIENT_SCOPES"),
+            audience=config.get("DATA_MANAGEMENT_CLIENT_AUDIENCE"),
+            client=DATA_MANAGEMENT_CLIENT,
+            iam_token_endpoint="https://ska-iam.stfc.ac.uk/token",
+            additional_scopes=additional_scopes,
+        )
 
 
 @app.get('/ping')
@@ -121,125 +98,113 @@ async def ping(request: Request):
 
 
 @app.get('/links', response_class=HTMLResponse)
-async def links(id, request: Request, client_ip_address: str = None, sort: str = 'nearest_by_client', must_include_soda: bool = False,
-                ranking: int = 0, token=Depends(refresh_access_token)) -> Union[templates.TemplateResponse, HTTPException]:
+async def links(id, request: Request, client_ip_address: str = None, sort: str = 'random',
+                must_include_soda: bool = False, ranking: int = 0) -> Union[templates.TemplateResponse, HTTPException]:
     try:
         scope, name = id.split(':')
     except ValueError:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, 'could not parse id.')
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, 'Could not parse id.')
 
-    # Get replicas for this DID.
+    # First we must get the replica locations (with some sort algorithm, e.g. geolocation) and data identifier metadata.
+    # This is retrieved from the data-management API.
     #
-    parameters = {
-        'dids': [{
-            'scope': scope,
-            'name': name
-        }],
-    }
-    response = requests.post(urllib.parse.urljoin(config.get('RUCIO_CFG_HOST'), 'replicas/list'),
-        headers={
-            'X-Rucio-Auth-Token': token,
-            'Content-type': 'application/json'
-        },
-        data=json.dumps(parameters).encode('utf-8')
-    )
-    content = response.content.decode('utf-8')
-    if response.status_code != 200:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "error getting replica data {}".format(content))
-    if content:
-        replicas_by_rse = json.loads(content)['rses']
-    else:
-        raise HTTPException(status.HTTP_204_NO_CONTENT)
+    metadata = {}
+    replicas_by_rse = None
+    if config.get("DATA_MANAGEMENT_ENDPOINT", default=None):
+        client = DataManagementServiceToken()
+        dm_token = client.get_token()
 
-    # Get metadata for this DID.
-    #
-    params = {
-        'plugin': 'POSTGRES_JSON'
-    }
-    response = requests.get(
-        urllib.parse.urljoin(config.get('RUCIO_CFG_HOST'), 'dids/{}/{}/meta'.format(
-            scope, name
-        )),
-        headers={
-            'X-Rucio-Auth-Token': token,
-            'Content-type': 'application/json'
-        },
-        params=params
-        )
-    content = response.content.decode('utf-8')
-    if response.status_code != 200:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "error getting metadata {}".format(content))
-    metadata = json.loads(content)
+        # Get metadata.
+        response = requests.get("{}/metadata/{}/{}".format(config.get('DATA_MANAGEMENT_ENDPOINT'), scope, name),
+                                headers={"Authorization": "Bearer {}".format(dm_token)})
+        content = response.content.decode('utf-8')
+        if response.status_code != 200:
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Error getting metadata {}".format(content))
+        metadata = json.loads(content)
 
-    # Refine replicas based on SODA service availability, if requested.
-    #
-    soda_sync_services_by_rse = OrderedDict()
-    soda_async_services_by_rse = OrderedDict()
-    if must_include_soda:
-        # Get a list of SODA services per RSE.
-        #
-        # FIXME: yikes
-        if not services_by_site:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, "must_include_soda not supported.")
-        for rse, replicas in replicas_by_rse.items():
-            for site in services_by_site:
-                for service in site['services']:
-                    if service['type'] == 'Rucio Storage Element (RSE)' and \
-                            service['identifier'] == rse:
-                        # sync
-                        for _service in site['services']:
-                            if _service['type'] == 'SODA (sync)':
-                                if not soda_sync_services_by_rse.get(rse, None):
-                                    soda_sync_services_by_rse[rse] = []
-                                soda_sync_services_by_rse[rse].append(_service)
-                        # async
-                        for _service in site['services']:
-                            if _service['type'] == 'SODA (async)':
-                                if not soda_async_services_by_rse.get(rse, None):
-                                    soda_async_services_by_rse[rse] = []
-                                soda_async_services_by_rse[rse].append(_service)
-        # remove sites with no SODA services (both sync and async)
-        for site in set(replicas_by_rse.keys()) - \
-                    set(soda_sync_services_by_rse.keys()) - \
-                    set(soda_async_services_by_rse.keys()):
-            replicas_by_rse.pop(site)
-
-    if not replicas_by_rse:
-        if must_include_soda:
-            details = "No replicas with local SODA service found for this DID."
+        # Locate replicas by some sorting algorithm (and retain this ordered result).
+        response = requests.get("{}/data/locate/{}/{}?sort={}&ip_address={}".format(
+            config.get('DATA_MANAGEMENT_ENDPOINT'), scope, name, sort, client_ip_address),
+            headers={"Authorization": "Bearer {}".format(dm_token)})
+        content = response.content.decode('utf-8')
+        if response.status_code != 200:
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Error getting replica data {}".format(content))
+        if content:
+            replicas_by_rse = OrderedDict(json.loads(content))
         else:
-            details = "No replicas found for this DID."
-        raise HTTPException(status.HTTP_404_NOT_FOUND, details)
+            raise HTTPException(status.HTTP_204_NO_CONTENT)
 
-    # FIXME: some of this should has been abstracted into the datalake api
-    # Get a replica depending on the sort algorithm.
+    # Next, we query the site-capabilities API for a list of services for each site (required for filtering by
+    # available services e.g. SODA).
     #
-    selected_rse = None
-    selected_rse_replica = None
-    if sort == 'random':
-        selected_rse = random.choice(list(replicas_by_rse.keys()))
-        selected_rse_replica = random.choice(replicas_by_rse[selected_rse])
-    elif sort == 'nearest_by_client':
-        if not geoip_reader or not rses:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, "nearest_by_client not supported.")
-        if not client_ip_address:
-            # requires use-forwarded-headers: 'true' in nginx-ingress cmap
-            client_ip_address = request.headers.get('x-real-ip', '')
-        try:
-            response = geoip_reader.city(client_ip_address)
-            client_location = (response.location.latitude, response.location.longitude)
-            distances_by_rse = OrderedDict()
-            for rse in rses:
-                if rse['name'] in replicas_by_rse:
-                    rse_location = (rse['latitude'], rse['longitude'])
-                    distances_by_rse[rse['name']] = int(great_circle(client_location, rse_location).km)
-            selected_rse = sorted(distances_by_rse, key=distances_by_rse.get)[ranking]
-            selected_rse_replica = random.choice(replicas_by_rse[selected_rse])
-        except geoip2.errors.AddressNotFoundError:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, "client ip address could not be geolocated.")
-    else:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "sort algorithm not understood.")
+    requires_services = any([must_include_soda])
+    if requires_services:
+        if config.get("SITE_CAPABILITIES_ENDPOINT", default=None):
+            client = SiteCapabilitiesServiceToken()
+            sc_token = client.get_token()
 
+            response = requests.get("{}/sites/latest".format(config.get('SITE_CAPABILITIES_ENDPOINT')),
+                                    headers={"Authorization": "Bearer {}".format(sc_token)})
+            content = response.content.decode('utf-8')
+            sites = json.loads(content)
+
+            # Get services by RSE
+            #
+            services_by_rse = {rse: [] for rse in list(replicas_by_rse.keys())}
+            for site in sites:
+                # First, get a dictionary of storage areas for this site (id -> storage area)
+                storage_areas = {}
+                for storage in site.get('storages', []):
+                    for storage_area in storage.get('areas', []):
+                        storage_area_id = storage_area.pop('id')
+                        storage_areas[storage_area_id] = storage_area
+
+                # Then iterate through compute and add associated services (with an associated_storage_area_id)
+                for compute in site.get('compute', []):
+                    for associated_service in compute.get('associated_services', []):
+                        # Get the storage area identifier associated with this service
+                        associated_storage_area = storage_areas[associated_service.get('associated_storage_area_id')]
+                        if associated_storage_area.get('identifier') and associated_storage_area.get('identifier') \
+                                in services_by_rse.keys():
+                            services_by_rse[associated_storage_area.get('identifier')].append(associated_service)
+
+            # Filter replicas based on SODA service availability, if requested.
+            #
+            # Get a list of SODA services per RSE.
+            if must_include_soda:
+                soda_sync_services_by_rse = {}
+                soda_async_services_by_rse = {}
+                for rse, services in services_by_rse.items():
+                    for service in services:
+                        if service.get('type', '') == 'SODA (sync)':
+                            if not soda_sync_services_by_rse.get(rse):
+                                soda_sync_services_by_rse[rse] = []
+                            soda_sync_services_by_rse[rse].append(service)
+                        if service.get('type', '') == 'SODA (sync)':
+                            if not soda_async_services_by_rse.get(rse):
+                                soda_async_services_by_rse[rse] = []
+                            soda_async_services_by_rse[rse].append(service)
+
+                # Remove sites with no SODA services (both sync and async)
+                for rse in set(replicas_by_rse.keys()) - \
+                            set(soda_sync_services_by_rse.keys()) - \
+                            set(soda_async_services_by_rse.keys()):
+                    replicas_by_rse.pop(rse)
+
+                if not replicas_by_rse:
+                    if must_include_soda:
+                        details = "No replicas with local SODA service found for this DID."
+                    else:
+                        details = "No replicas found for this DID."
+                    raise HTTPException(status.HTTP_404_NOT_FOUND, details)
+
+    # Select the RSE (by ranking) and replica (randomly)
+    if ranking > len(replicas_by_rse)-1:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Ranking is greater than number of replicas.")
+    selected_rse = list(replicas_by_rse.keys())[ranking]
+    selected_rse_replica = random.choice(replicas_by_rse[selected_rse])
+
+    # Return populated Datalink XML result
     access_url = selected_rse_replica
     soda_sync_service = {}
     soda_async_service = {}
@@ -249,7 +214,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
     return templates.TemplateResponse("datalink.template.xml", {
         "request": request,
         "ivoa_authority": config.get('IVOA_AUTHORITY'),
-        "path_on_storage": "{}/{}".format(scope, access_url.split(scope)[1].lstrip('/')),       #FIXME: this doesn't necessarily work for non-deterministic, need to look it up
+        "path_on_storage": "{}/{}".format(scope, access_url.split(scope)[1].lstrip('/')),                         #FIXME: this doesn't necessarily work for non-deterministic, need to look it up
         "access_url": access_url,
         "description": metadata.get('obs_id', ''),
         "content_type": metadata.get('content_type', ''),
@@ -258,9 +223,11 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         "include_soda": must_include_soda,
         "soda_sync_resource_identifier": soda_sync_service.get('other_attributes', {}).get(
             'resourceIdentifier', {}).get('value', None) or '',    # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
-        "soda_sync_access_url": "https://data-management.srcdev.skao.int/api/v1/data/soda/{}/{}/{}".format(soda_sync_service.get('id'), scope, name),
+        "soda_sync_access_url": "https://data-management.srcdev.skao.int/api/v1/data/soda/{}/{}/{}".format(
+            soda_sync_service.get('id'), scope, name),
         "soda_async_resource_identifier": soda_async_service.get('other_attributes', {}).get(
             'resourceIdentifier', {}).get('value', None) or '',     # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
-        "soda_async_access_url": "https://data-management.srcdev.skao.int/api/v1/data/soda/{}/{}/{}".format(soda_sync_service.get('id'), scope, name),
+        "soda_async_access_url": "https://data-management.srcdev.skao.int/api/v1/data/soda/{}/{}/{}".format(
+            soda_sync_service.get('id'), scope, name),
     }, media_type="application/xml")
 

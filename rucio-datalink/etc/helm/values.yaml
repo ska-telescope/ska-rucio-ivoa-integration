@@ -6,17 +6,15 @@ image:
 
 namespace: rucio-ivoa-integration
 
-rucioCfg:
-  host: https://rucio.srcdev.skao.int
-  authType: oidc
-  account: root
-  oidcScope: openid offline_access profile wlcg.groups
-  oidcAudience: rucio https://wlcg.cern.ch/jwt/v1/any
-
 siteCapabilitiesEndpoint: https://site-capabilities.srcdev.skao.int/api/v1
 siteCapabilitiesClientId: 1f901a38-955f-4198-aedb-002332a3c551
 siteCapabilitiesClientScopes: openid profile site-capabilities-api-service
 siteCapabilitiesClientAudience: site-capabilities-api
+
+dataManagementEndpoint: https://data-management.srcdev.skao.int/api/v1
+dataManagementClientId: 0ab39d2f-5428-484b-815d-dadfbad17416
+dataManagementClientScopes: openid profile data-management-api-service
+dataManagementClientAudience: data-management-api
 
 ivoaAuthority: auth.example.org/datasets/fits
 
@@ -24,10 +22,6 @@ service:
   datalink:
     port: 8080
 
-# Secret information, override during helm install 
-oidcAgentAuthClientCfgValue: username 
-oidcAgentAuthClientCfgPassword: password
+# Secret information, override during helm install
 siteCapabilitiesClientSecret: password
-
-
-geoIpLicenseKey: secretkey
+dataManagementClientSecret: password

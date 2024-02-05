@@ -142,8 +142,6 @@ Logfiles for DaCHS can be found at `/var/gavo/logs/dc*`.
 The following has only been considered for the DaCHS implementation and builds upon the TAP service implementation. See `Running a TAP service -> Using the DaCHS library` for 
 more information.
 
-![docs/img/cds-1.png](doc/img/dachs-2.png)
-
 #### Additional available endpoints
 
 These endpoints are additional to the ones described in `Running a TAP service -> Using the DaCHS library`.
@@ -159,11 +157,9 @@ These endpoints are additional to the ones described in `Running a TAP service -
 
 The `rucio-datalink` service requires the following additional environment variables to be set in the container, e.g. by using a `.env` file:
 
-- `OIDC_AGENT_AUTH_CLIENT_CFG_VALUE` is the [oidc-agent](https://github.com/indigo-dc/oidc-agent) encrypted Rucio auth client configuration complete with refresh token,
-- `OIDC_AGENT_AUTH_CLIENT_CFG_PASSWORD` is the password to decode the above configuration file, and
+- `SITE_CAPABILITIES_CLIENT_SECRET` is the site-capabilities API (service) client secret,
+- `DATA_MANAGEMENT_CLIENT_SECRET` is the data-management API (service) client secret,
 - (optional) `GEOIP_LICENSE_KEY` is a (free) [GeoLite2](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) license key.
-
-The OIDC client details are required for the Datalink service to talk to the Rucio API. They should be configured using a service account - don't log in to IAM using your own credentials!
 
 A license key for GeoLite2 is required in order to geolocate a client's IP when finding the closest replica. A deployed version of the [site-directory](https://gitlab.com/ska-telescope/src/src-site-directory/-/tree/main/src/site_directory) tool is also required for this. If a license key is not set, a random storage site will be selected.
 
