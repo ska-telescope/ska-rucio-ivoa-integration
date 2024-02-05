@@ -139,8 +139,7 @@ Logfiles for DaCHS can be found at `/var/gavo/logs/dc*`.
 
 ## Running an SCS service and enabling data access (DaCHS only)
 
-The following has only been considered for the DaCHS implementation and builds upon the TAP service implementation. See `Running a TAP service -> Using the DaCHS library` for 
-more information.
+The following has only been considered for the DaCHS implementation and builds upon the TAP service implementation. See `Running a TAP service -> Using the DaCHS library` for more information. It requires access to the SRCNet Data Management and Site Capabilities APIs.
 
 #### Additional available endpoints
 
@@ -159,9 +158,6 @@ The `rucio-datalink` service requires the following additional environment varia
 
 - `SITE_CAPABILITIES_CLIENT_SECRET` is the site-capabilities API (service) client secret,
 - `DATA_MANAGEMENT_CLIENT_SECRET` is the data-management API (service) client secret,
-- (optional) `GEOIP_LICENSE_KEY` is a (free) [GeoLite2](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) license key.
-
-A license key for GeoLite2 is required in order to geolocate a client's IP when finding the closest replica. A deployed version of the [site-directory](https://gitlab.com/ska-telescope/src/src-site-directory/-/tree/main/src/site_directory) tool is also required for this. If a license key is not set, a random storage site will be selected.
 
 ##### Locally
 
