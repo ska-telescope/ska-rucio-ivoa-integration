@@ -8,6 +8,7 @@ RUN useradd -ms /bin/bash user
 
 COPY --chown=user:user . /opt/rucio_datalink
 
+RUN python3 -m pip install ska-src-data-management-api --index-url https://gitlab.com/api/v4/projects/47269526/packages/pypi/simple
 RUN cd /opt/rucio_datalink && python3 -m pip install -e .
 
 WORKDIR /opt/rucio_datalink

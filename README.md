@@ -156,7 +156,6 @@ These endpoints are additional to the ones described in `Running a TAP service -
 
 The `rucio-datalink` service requires the following additional environment variables to be set in the container, e.g. by using a `.env` file:
 
-- `SITE_CAPABILITIES_CLIENT_SECRET` is the site-capabilities API (service) client secret,
 - `DATA_MANAGEMENT_CLIENT_SECRET` is the data-management API (service) client secret,
 
 ##### Locally

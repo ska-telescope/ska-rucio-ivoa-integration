@@ -17,14 +17,6 @@ spec:
     spec:
       containers:
       - env:
-        - name: SITE_CAPABILITIES_ENDPOINT
-          value: "{{ .Values.siteCapabilitiesEndpoint }}"
-        - name: SITE_CAPABILITIES_CLIENT_ID
-          value: "{{ .Values.siteCapabilitiesClientId }}"
-        - name: SITE_CAPABILITIES_CLIENT_SCOPES
-          value: "{{ .Values.siteCapabilitiesClientScopes }}"
-        - name: SITE_CAPABILITIES_CLIENT_AUDIENCE
-          value: "{{ .Values.siteCapabilitiesClientAudience }}"
         - name: DATA_MANAGEMENT_ENDPOINT
           value: "{{ .Values.dataManagementEndpoint }}"
         - name: DATA_MANAGEMENT_CLIENT_ID

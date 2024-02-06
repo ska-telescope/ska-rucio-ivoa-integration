@@ -6,11 +6,6 @@ image:
 
 namespace: rucio-ivoa-integration
 
-siteCapabilitiesEndpoint: https://site-capabilities.srcdev.skao.int/api/v1
-siteCapabilitiesClientId: 1f901a38-955f-4198-aedb-002332a3c551
-siteCapabilitiesClientScopes: openid profile site-capabilities-api-service
-siteCapabilitiesClientAudience: site-capabilities-api
-
 dataManagementEndpoint: https://data-management.srcdev.skao.int/api/v1
 dataManagementClientId: 0ab39d2f-5428-484b-815d-dadfbad17416
 dataManagementClientScopes: openid profile data-management-api-service
@@ -23,5 +18,4 @@ service:
     port: 8080
 
 # Secret information, override during helm install
-siteCapabilitiesClientSecret: password
 dataManagementClientSecret: password

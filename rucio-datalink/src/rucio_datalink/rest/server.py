@@ -12,6 +12,8 @@ from fastapi.templating import Jinja2Templates
 from starlette.config import Config
 from starlette.responses import Response, HTMLResponse, JSONResponse
 
+from ska_src_data_management_api.client.data_management import DataManagementClient
+
 config = Config()
 
 # Instantiate FastAPI() allowing CORS.
@@ -27,12 +29,8 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# Instantiate an OAuth2 request session for the data-management-api, site-capabilities-api and rucio-admin clients.
+# Instantiate an OAuth2 request session for the data-management-api.
 #
-SITE_CAPABILITIES_CLIENT = OAuth2Session(config.get("SITE_CAPABILITIES_CLIENT_ID"),
-                                         config.get("SITE_CAPABILITIES_CLIENT_SECRET"),
-                                         scope=config.get("SITE_CAPABILITIES_CLIENT_SCOPES", default=""))
-
 DATA_MANAGEMENT_CLIENT = OAuth2Session(config.get("DATA_MANAGEMENT_CLIENT_ID"),
                                          config.get("DATA_MANAGEMENT_CLIENT_SECRET"),
                                          scope=config.get("DATA_MANAGEMENT_CLIENT_SCOPES", default=""))
@@ -64,19 +62,6 @@ class ServiceToken:
         except Exception as e:
             raise Exception(repr(e))
         return token.get('access_token')
-
-
-# A site capabilities service token.
-#
-class SiteCapabilitiesServiceToken(ServiceToken):
-    def __init__(self, additional_scopes: Optional[str] = None):
-        super().__init__(
-            default_scopes=config.get("SITE_CAPABILITIES_CLIENT_SCOPES"),
-            audience=config.get("SITE_CAPABILITIES_CLIENT_AUDIENCE"),
-            client=SITE_CAPABILITIES_CLIENT,
-            iam_token_endpoint="https://ska-iam.stfc.ac.uk/token",
-            additional_scopes=additional_scopes,
-        )
 
 
 # A data management service token.
@@ -114,89 +99,43 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         client = DataManagementServiceToken()
         dm_token = client.get_token()
 
-        # Get metadata.
-        response = requests.get("{}/metadata/{}/{}".format(config.get('DATA_MANAGEMENT_ENDPOINT'), scope, name),
-                                headers={"Authorization": "Bearer {}".format(dm_token)})
-        content = response.content.decode('utf-8')
-        if response.status_code != 200:
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Error getting metadata {}".format(content))
-        metadata = json.loads(content)
+        session = requests.Session()
+        session.headers.update({'Authorization': 'Bearer {}'.format(dm_token)})
+        data_management = DataManagementClient(config.get('DATA_MANAGEMENT_ENDPOINT'), session=session)
 
-        # Locate replicas by some sorting algorithm (and retain this ordered result).
-        response = requests.get("{}/data/locate/{}/{}?sort={}&ip_address={}".format(
-            config.get('DATA_MANAGEMENT_ENDPOINT'), scope, name, sort, client_ip_address),
-            headers={"Authorization": "Bearer {}".format(dm_token)})
-        content = response.content.decode('utf-8')
-        if response.status_code != 200:
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Error getting replica data {}".format(content))
-        if content:
-            replicas_by_rse = OrderedDict(json.loads(content))
+        metadata = data_management.get_metadata(namespace=scope, name=name).json()
+
+        replicas_by_rse = {}
+
+        if must_include_soda:
+            soda_sync_services_by_rse = {}
+            soda_async_services_by_rse = {}
+            # Get list of replicas colocated with SODA services
+            replicas_and_services_by_rse = data_management.locate_replicas_of_file(
+                namespace=scope,
+                name=name,
+                sort=sort,
+                ip_address=client_ip_address,
+                colocated_services="SODA (async), SODA (sync)"                                                          #FIXME: Just SODA for now.
+            ).json()
+
+            # Sort response into replicas by RSE and SODA services by RSE
+            for rse, replicas_and_services in replicas_and_services_by_rse.items():
+                replicas_by_rse[rse] = replicas_and_services.get('replicas', [])
+                soda_sync_services_by_rse[rse] = [service for service in replicas_and_services.get('services', [])
+                                                  if service.get('type') == 'SODA (sync)']
+                soda_async_services_by_rse[rse] = [service for service in replicas_and_services.get('services', [])
+                                                   if service.get('type') == 'SODA (async)']
         else:
+            replicas_by_rse = data_management.locate_replicas_of_file(
+                namespace=scope,
+                name=name,
+                sort=sort,
+                ip_address=client_ip_address
+            ).json()
+
+        if not replicas_by_rse:
             raise HTTPException(status.HTTP_204_NO_CONTENT)
-
-    # Next, we query the site-capabilities API for a list of services for each site (required for filtering by
-    # available services e.g. SODA).
-    #
-    requires_services = any([must_include_soda])
-    if requires_services:
-        if config.get("SITE_CAPABILITIES_ENDPOINT", default=None):
-            client = SiteCapabilitiesServiceToken()
-            sc_token = client.get_token()
-
-            response = requests.get("{}/sites/latest".format(config.get('SITE_CAPABILITIES_ENDPOINT')),
-                                    headers={"Authorization": "Bearer {}".format(sc_token)})
-            content = response.content.decode('utf-8')
-            sites = json.loads(content)
-
-            # Get services by RSE
-            #
-            services_by_rse = {rse: [] for rse in list(replicas_by_rse.keys())}
-            for site in sites:
-                # First, get a dictionary of storage areas for this site (id -> storage area)
-                storage_areas = {}
-                for storage in site.get('storages', []):
-                    for storage_area in storage.get('areas', []):
-                        storage_area_id = storage_area.pop('id')
-                        storage_areas[storage_area_id] = storage_area
-
-                # Then iterate through compute and add associated services (with an associated_storage_area_id)
-                for compute in site.get('compute', []):
-                    for associated_service in compute.get('associated_services', []):
-                        # Get the storage area identifier associated with this service
-                        associated_storage_area = storage_areas[associated_service.get('associated_storage_area_id')]
-                        if associated_storage_area.get('identifier') and associated_storage_area.get('identifier') \
-                                in services_by_rse.keys():
-                            services_by_rse[associated_storage_area.get('identifier')].append(associated_service)
-
-            # Filter replicas based on SODA service availability, if requested.
-            #
-            # Get a list of SODA services per RSE.
-            if must_include_soda:
-                soda_sync_services_by_rse = {}
-                soda_async_services_by_rse = {}
-                for rse, services in services_by_rse.items():
-                    for service in services:
-                        if service.get('type', '') == 'SODA (sync)':
-                            if not soda_sync_services_by_rse.get(rse):
-                                soda_sync_services_by_rse[rse] = []
-                            soda_sync_services_by_rse[rse].append(service)
-                        if service.get('type', '') == 'SODA (sync)':
-                            if not soda_async_services_by_rse.get(rse):
-                                soda_async_services_by_rse[rse] = []
-                            soda_async_services_by_rse[rse].append(service)
-
-                # Remove sites with no SODA services (both sync and async)
-                for rse in set(replicas_by_rse.keys()) - \
-                            set(soda_sync_services_by_rse.keys()) - \
-                            set(soda_async_services_by_rse.keys()):
-                    replicas_by_rse.pop(rse)
-
-                if not replicas_by_rse:
-                    if must_include_soda:
-                        details = "No replicas with local SODA service found for this DID."
-                    else:
-                        details = "No replicas found for this DID."
-                    raise HTTPException(status.HTTP_404_NOT_FOUND, details)
 
     # Select the RSE (by ranking) and replica (randomly)
     if ranking > len(replicas_by_rse)-1:
@@ -214,7 +153,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
     return templates.TemplateResponse("datalink.template.xml", {
         "request": request,
         "ivoa_authority": config.get('IVOA_AUTHORITY'),
-        "path_on_storage": "{}/{}".format(scope, access_url.split(scope)[1].lstrip('/')),                         #FIXME: this doesn't necessarily work for non-deterministic, need to look it up
+        "path_on_storage": "{}/{}".format(scope, access_url.split(scope)[1].lstrip('/')),                               #FIXME: this doesn't necessarily work for non-deterministic, need to look it up
         "access_url": access_url,
         "description": metadata.get('obs_id', ''),
         "content_type": metadata.get('content_type', ''),
