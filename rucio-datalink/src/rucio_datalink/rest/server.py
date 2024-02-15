@@ -111,7 +111,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
             soda_sync_services_by_rse = {}
             soda_async_services_by_rse = {}
             # Get list of replicas colocated with SODA services
-            replicas_and_services_by_rse = data_management.locate_replicas_of_file(
+            location_response = data_management.locate_replicas_of_file(
                 namespace=scope,
                 name=name,
                 sort=sort,
@@ -120,19 +120,29 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
             ).json()
 
             # Sort response into replicas by RSE and SODA services by RSE
-            for rse, replicas_and_services in replicas_and_services_by_rse.items():
-                replicas_by_rse[rse] = replicas_and_services.get('replicas', [])
-                soda_sync_services_by_rse[rse] = [service for service in replicas_and_services.get('services', [])
-                                                  if service.get('type') == 'SODA (sync)']
-                soda_async_services_by_rse[rse] = [service for service in replicas_and_services.get('services', [])
-                                                   if service.get('type') == 'SODA (async)']
+            for entry in location_response:
+                rse = entry.get('identifier')
+                replicas = entry.get('replicas')
+                colocated_services = entry.get('colocated_services')
+
+                replicas_by_rse[rse] = replicas
+                soda_sync_services_by_rse[rse] = [
+                    service for service in colocated_services if service.get('type') == 'SODA (sync)']
+                soda_async_services_by_rse[rse] = [
+                    service for service in colocated_services if service.get('type') == 'SODA (async)']
         else:
-            replicas_by_rse = data_management.locate_replicas_of_file(
+            location_response = data_management.locate_replicas_of_file(
                 namespace=scope,
                 name=name,
                 sort=sort,
                 ip_address=client_ip_address
             ).json()
+
+            for entry in location_response:
+                rse = entry.get('identifier')
+                replicas = entry.get('replicas')
+
+                replicas_by_rse[rse] = replicas
 
         if not replicas_by_rse:
             raise HTTPException(status.HTTP_204_NO_CONTENT)
