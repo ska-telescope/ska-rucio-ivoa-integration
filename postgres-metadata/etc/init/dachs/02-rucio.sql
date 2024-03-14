@@ -59,7 +59,7 @@ CREATE TABLE rucio.obscore OF rucio.obscore_row (
     obs_id            NOT NULL,
     obs_publisher_did NOT NULL,
     CONSTRAINT obscore_pkey PRIMARY KEY (rucio_did_scope, rucio_did_name),
-    FOREIGN KEY (rucio_did_scope, rucio_did_name) REFERENCES rucio.dids (scope, name)
+    FOREIGN KEY (rucio_did_scope, rucio_did_name) REFERENCES rucio.dids (scope, name) ON DELETE CASCADE
 );
 
 CREATE INDEX i_obscore_region ON rucio.obscore USING gist (s_region);
