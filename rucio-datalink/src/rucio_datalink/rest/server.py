@@ -79,7 +79,11 @@ class DataManagementServiceToken(ServiceToken):
 
 @app.get('/ping')
 async def ping(request: Request):
-    return JSONResponse('pong')
+    """ Service aliveness. """
+    return JSONResponse({
+        'status': "UP",
+        'version': os.environ.get('SERVICE_VERSION'),
+    })
 
 
 @app.get('/links', response_class=HTMLResponse)

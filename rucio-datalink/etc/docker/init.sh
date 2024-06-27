@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export SERVICE_VERSION=`cat VERSION`
+
 cd /opt/rucio_datalink/src/rucio_datalink/rest
 
 # run server in bg
