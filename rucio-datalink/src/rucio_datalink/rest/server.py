@@ -101,12 +101,12 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
     metadata = {}
     replicas_by_rse = None
     if config.get("DATA_MANAGEMENT_ENDPOINT", default=None):
-        client = DataManagementServiceToken()
-        dm_token = client.get_token()
+        dm_client = DataManagementServiceToken()
+        dm_token = dm_client.get_token()
 
-        session = requests.Session()
-        session.headers.update({'Authorization': 'Bearer {}'.format(dm_token)})
-        data_management = DataManagementClient(config.get('DATA_MANAGEMENT_ENDPOINT'), session=session)
+        dm_session = requests.Session()
+        dm_session.headers.update({'Authorization': 'Bearer {}'.format(dm_token)})
+        data_management = DataManagementClient(config.get('DATA_MANAGEMENT_ENDPOINT'), session=dm_session)
 
         metadata = data_management.get_metadata(namespace=scope, name=name).json()
 
@@ -177,11 +177,11 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         "include_soda": must_include_soda,
         "soda_sync_resource_identifier": soda_sync_service.get('other_attributes', {}).get(
             'resourceIdentifier', {}).get('value', None) or '',    # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
-        "soda_sync_access_url": "https://data-management.srcdev.skao.int/api/v1/data/soda/{}/{}/{}".format(
-            soda_sync_service.get('id'), scope, name),
+        "soda_sync_access_url": "{}://{}:{}/{}".format(soda_sync_service.get('prefix'), soda_sync_service.get('host'),
+                                                       soda_sync_service.get('port'), soda_sync_service.get('path').lstrip('/')),
         "soda_async_resource_identifier": soda_async_service.get('other_attributes', {}).get(
             'resourceIdentifier', {}).get('value', None) or '',     # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
-        "soda_async_access_url": "https://data-management.srcdev.skao.int/api/v1/data/soda/{}/{}/{}".format(
-            soda_sync_service.get('id'), scope, name),
+        "soda_async_access_url": "{}://{}:{}/{}".format(soda_async_service.get('prefix'), soda_async_service.get('host'),
+                                                        soda_async_service.get('port'), soda_async_service.get('path').lstrip('/')),
     }, media_type="application/xml")
 

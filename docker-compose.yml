@@ -71,10 +71,6 @@ services:
       - DATA_MANAGEMENT_CLIENT_SCOPES=openid profile data-management-api-service
       - DATA_MANAGEMENT_CLIENT_AUDIENCE=data-management-api
       - DATA_MANAGEMENT_ENDPOINT=https://data-management.srcdev.skao.int/api/v1
-      - SITE_CAPABILITIES_CLIENT_ID=1f901a38-955f-4198-aedb-002332a3c551
-      - SITE_CAPABILITIES_CLIENT_SCOPES=openid profile site-capabilities-api-service
-      - SITE_CAPABILITIES_CLIENT_AUDIENCE=site-capabilities-api
-      - SITE_CAPABILITIES_ENDPOINT=https://site-capabilities.srcdev.skao.int/api/v1
       - SERVICE_DATALINK_PORT=10000
       - IVOA_AUTHORITY=auth.example.org/datasets/fits
     env_file:
