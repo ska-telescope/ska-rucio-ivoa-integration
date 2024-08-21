@@ -121,7 +121,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
                 name=name,
                 sort=sort,
                 ip_address=client_ip_address,
-                colocated_services="SODA (async), SODA (sync)"                                                          #FIXME: Just SODA for now.
+                colocated_services="soda_sync, soda_async"                                                              #FIXME: Just SODA for now.
             ).json()
 
             # Sort response into replicas by RSE and SODA services by RSE
@@ -132,9 +132,9 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
 
                 replicas_by_rse[rse] = replicas
                 soda_sync_services_by_rse[rse] = [
-                    service for service in colocated_services if service.get('type') == 'SODA (sync)']
+                    service for service in colocated_services if service.get('type') == 'soda_sync']
                 soda_async_services_by_rse[rse] = [
-                    service for service in colocated_services if service.get('type') == 'SODA (async)']
+                    service for service in colocated_services if service.get('type') == 'soda_async']
         else:
             location_response = data_management.locate_replicas_of_file(
                 namespace=scope,
