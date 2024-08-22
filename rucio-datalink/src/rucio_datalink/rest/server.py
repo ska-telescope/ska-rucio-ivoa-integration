@@ -178,10 +178,10 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         "soda_sync_resource_identifier": soda_sync_service.get('other_attributes', {}).get(
             'resourceIdentifier', {}).get('value', None) or '',    # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
         "soda_sync_access_url": "{}://{}:{}/{}".format(soda_sync_service.get('prefix'), soda_sync_service.get('host'),
-                                                       soda_sync_service.get('port'), soda_sync_service.get('path').lstrip('/')),
+                                                       soda_sync_service.get('port'), soda_sync_service.get('path', "").lstrip('/')),
         "soda_async_resource_identifier": soda_async_service.get('other_attributes', {}).get(
             'resourceIdentifier', {}).get('value', None) or '',     # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
         "soda_async_access_url": "{}://{}:{}/{}".format(soda_async_service.get('prefix'), soda_async_service.get('host'),
-                                                        soda_async_service.get('port'), soda_async_service.get('path').lstrip('/')),
+                                                        soda_async_service.get('port'), soda_async_service.get('path', "").lstrip('/')),
     }, media_type="application/xml")
 
