@@ -121,7 +121,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
                 name=name,
                 sort=sort,
                 ip_address=client_ip_address,
-                colocated_services="SODA (async), SODA (sync)"                                                          #FIXME: Just SODA for now.
+                colocated_services="soda_sync, soda_async"                                                              #FIXME: Just SODA for now.
             ).json()
 
             # Sort response into replicas by RSE and SODA services by RSE
@@ -132,9 +132,9 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
 
                 replicas_by_rse[rse] = replicas
                 soda_sync_services_by_rse[rse] = [
-                    service for service in colocated_services if service.get('type') == 'SODA (sync)']
+                    service for service in colocated_services if service.get('type') == 'soda_sync']
                 soda_async_services_by_rse[rse] = [
-                    service for service in colocated_services if service.get('type') == 'SODA (async)']
+                    service for service in colocated_services if service.get('type') == 'soda_async']
         else:
             location_response = data_management.locate_replicas_of_file(
                 namespace=scope,
@@ -178,10 +178,10 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         "soda_sync_resource_identifier": soda_sync_service.get('other_attributes', {}).get(
             'resourceIdentifier', {}).get('value', None) or '',    # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
         "soda_sync_access_url": "{}://{}:{}/{}".format(soda_sync_service.get('prefix'), soda_sync_service.get('host'),
-                                                       soda_sync_service.get('port'), soda_sync_service.get('path').lstrip('/')),
+                                                       soda_sync_service.get('port'), soda_sync_service.get('path', "").lstrip('/')),
         "soda_async_resource_identifier": soda_async_service.get('other_attributes', {}).get(
             'resourceIdentifier', {}).get('value', None) or '',     # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
         "soda_async_access_url": "{}://{}:{}/{}".format(soda_async_service.get('prefix'), soda_async_service.get('host'),
-                                                        soda_async_service.get('port'), soda_async_service.get('path').lstrip('/')),
+                                                        soda_async_service.get('port'), soda_async_service.get('path', "").lstrip('/')),
     }, media_type="application/xml")
 
