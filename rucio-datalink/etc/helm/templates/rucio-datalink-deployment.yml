@@ -34,11 +34,6 @@ spec:
             secretKeyRef:
               name: {{ .Release.Name }}-data-management-client-config
               key: data-management-client-cfg-secret
-        - name: SITE_CAPABILITIES_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-site-capabilities-client-config
-              key: site-capabilities-client-cfg-secret
         image: {{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: rucio-datalink
