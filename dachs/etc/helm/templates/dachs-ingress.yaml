@@ -4,17 +4,7 @@ metadata:
   name: dachs-ingress
 spec:
   rules:
-  - host: ivoa.dachs.srcdev.skao.int
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: dachs
-            port:
-              number: 8080
-  - host: dachs.ivoa.srcdev.skao.int
+  - host: {{ .Values.ingress.host }}
     http:
       paths:
       - path: /

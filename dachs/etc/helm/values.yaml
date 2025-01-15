@@ -4,14 +4,15 @@ image:
   tag: latest
   pullPolicy: Always
 
-deployment:
-  namespace: rucio-ivoa-integration
+namespace: rucio-ivoa-integration
 
-svc:
-  dachs:
-    gavorc_server_url: https://dachs.ivoa.srcdev.skao.int:443
-    gavorc_server_port: 443
-    dachs_postgres_host: postgres-metadata-postgresql.rucio.svc.cluster.local
-    dachs_postgres_dbname: metadata
-    ivoa_authority: test.skao
+config:
+  gavorc_server_url: https://dachs.ivoa.srcnet.skao.int:443
+  gavorc_server_port: 443
+  dachs_postgres_host: rucio-metadata-postgres-postgresql.rucio.svc.cluster.local
+  dachs_postgres_dbname: metadata
+  ivoa_authority: test.skao
+
+ingress:
+  host: dachs.ivoa.srcnet.skao.int
 

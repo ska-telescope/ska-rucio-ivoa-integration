@@ -17,31 +17,34 @@ spec:
     spec:
       containers:
       - env:
-        - name: DATA_MANAGEMENT_ENDPOINT
-          value: "{{ .Values.dataManagementEndpoint }}"
-        - name: DATA_MANAGEMENT_CLIENT_ID
-          value: "{{ .Values.dataManagementClientId }}"
-        - name: DATA_MANAGEMENT_CLIENT_SCOPES
-          value: "{{ .Values.dataManagementClientScopes }}"
-        - name: DATA_MANAGEMENT_CLIENT_AUDIENCE
-          value: "{{ .Values.dataManagementClientAudience }}"
+        - name: DATA_MANAGEMENT_API_ADDRESS
+          value: "{{ .Values.config.dataManagementApiAddress }}"
+        - name: DATA_MANAGEMENT_API_CLIENT_SCOPES
+          value: "{{ .Values.config.dataManagementApiClientScopes }}"
+        - name: DATA_MANAGEMENT_API_CLIENT_AUDIENCE
+          value: "{{ .Values.config.dataManagementApiClientAudience }}"
         - name: IVOA_AUTHORITY
-          value: "{{ .Values.ivoaAuthority }}"
-        - name: SERVICE_DATALINK_PORT
-          value: "{{ .Values.service.datalink.port }}"
-        - name: DATA_MANAGEMENT_CLIENT_SECRET
+          value: "{{ .Values.config.ivoaAuthority }}"
+        - name: SERVICE_PORT
+          value: "{{ .Values.service.port }}"
+        - name: DATA_MANAGEMENT_API_CLIENT_ID
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-data-management-client-config
-              key: data-management-client-cfg-secret
+              name: data-management-api-client-credentials
+              key: data-management-api-client-id
+        - name: DATA_MANAGEMENT_API_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: data-management-api-client-credentials
+              key: data-management-api-client-secret
         image: {{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: rucio-datalink
         ports:
-        - containerPort: {{ .Values.service.datalink.port }}
+        - containerPort: {{ .Values.service.port }}
         resources: {}
         livenessProbe:
           httpGet:
             path: /ping
-            port: 8080
+            port: {{ .Values.service.port }}
       restartPolicy: Always

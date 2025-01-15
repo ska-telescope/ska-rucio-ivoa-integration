@@ -6,16 +6,14 @@ image:
 
 namespace: rucio-ivoa-integration
 
-dataManagementEndpoint: https://data-management.srcdev.skao.int/api/v1
-dataManagementClientId: 0ab39d2f-5428-484b-815d-dadfbad17416
-dataManagementClientScopes: openid profile data-management-api-service
-dataManagementClientAudience: data-management-api
-
-ivoaAuthority: auth.example.org/datasets/fits
+config:
+  dataManagementApiEndpoint: https://data-management.srcdev.skao.int/api/v1
+  dataManagementApiClientScopes: openid profile data-management-api-service
+  dataManagementApiClientAudience: data-management-api
+  ivoaAuthority: auth.example.org/datasets/fits
 
 service:
-  datalink:
-    port: 8080
+  port: 8080
 
-# Secret information, override during helm install
-dataManagementClientSecret: password
+ingress:
+  host: datalink.ivoa.srcnet.skao.int

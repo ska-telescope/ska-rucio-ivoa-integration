@@ -17,15 +17,15 @@ spec:
       containers:
       - env:
         - name: GAVORC_SERVER_URL
-          value: "{{ .Values.svc.dachs.gavorc_server_url }}"
+          value: "{{ .Values.config.gavorc_server_url }}"
         - name: GAVORC_SERVER_PORT
-          value: "{{ .Values.svc.dachs.gavorc_server_port }}"
+          value: "{{ .Values.config.gavorc_server_port }}"
         - name: DACHS_POSTGRES_HOST
-          value: "{{ .Values.svc.dachs.dachs_postgres_host }}"
+          value: "{{ .Values.config.dachs_postgres_host }}"
         - name: DACHS_POSTGRES_DBNAME
-          value: "{{ .Values.svc.dachs.dachs_postgres_dbname }}"
+          value: "{{ .Values.config.dachs_postgres_dbname }}"
         - name: IVOA_AUTHORITY
-          value: "{{ .Values.svc.dachs.ivoa_authority }}"
+          value: "{{ .Values.config.ivoa_authority }}"
         image: {{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: dachs

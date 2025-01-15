@@ -6,7 +6,7 @@ metadata:
   nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
-  - host: ivoa.datalink.srcdev.skao.int
+  - host: {{ .Values.ingress.host }}
     http:
       paths:
       - path: /rucio(/|$)(.*)
@@ -15,17 +15,7 @@ spec:
           service:
             name: rucio-datalink
             port:
-              number: {{ .Values.service.datalink.port }}
-  - host: datalink.ivoa.srcdev.skao.int
-    http:
-      paths:
-      - path: /rucio(/|$)(.*)
-        pathType: Prefix
-        backend:
-          service:
-            name: rucio-datalink
-            port:
-              number: {{ .Values.service.datalink.port }}
+              number: {{ .Values.service.port }}
   ingressClassName: nginx
 
 
