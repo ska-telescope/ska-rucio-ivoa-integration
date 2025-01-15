@@ -1,5 +1,5 @@
 image:
-  repository: registry.gitlab.com/ska-telescope/src/src-mm/ska-src-rucio-ivoa-integrations
+  repository: registry.gitlab.com/ska-telescope/src/src-mm/ska-src-mm-rucio-ivoa-integrations
   name: rucio-datalink  
   tag: latest
   pullPolicy: Always
