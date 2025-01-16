@@ -17,26 +17,26 @@ spec:
     spec:
       containers:
       - env:
-        - name: DATA_MANAGEMENT_API_ADDRESS
-          value: "{{ .Values.config.dataManagementApiAddress }}"
-        - name: DATA_MANAGEMENT_API_CLIENT_SCOPES
-          value: "{{ .Values.config.dataManagementApiClientScopes }}"
-        - name: DATA_MANAGEMENT_API_CLIENT_AUDIENCE
-          value: "{{ .Values.config.dataManagementApiClientAudience }}"
+        - name: DATA_MANAGEMENT_API_URL
+          value: "{{ .Values.config.dataManagementApiUrl }}"
+        - name: DATA_MANAGEMENT_CLIENT_SCOPES
+          value: "{{ .Values.config.dataManagementClientScopes }}"
+        - name: DATA_MANAGEMENT_CLIENT_AUDIENCE
+          value: "{{ .Values.config.dataManagementClientAudience }}"
         - name: IVOA_AUTHORITY
           value: "{{ .Values.config.ivoaAuthority }}"
         - name: SERVICE_PORT
           value: "{{ .Values.service.port }}"
-        - name: DATA_MANAGEMENT_API_CLIENT_ID
+        - name: DATA_MANAGEMENT_CLIENT_ID
           valueFrom:
             secretKeyRef:
               name: data-management-api-client-credentials
-              key: data-management-api-client-id
-        - name: DATA_MANAGEMENT_API_CLIENT_SECRET
+              key: client-id
+        - name: DATA_MANAGEMENT_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
               name: data-management-api-client-credentials
-              key: data-management-api-client-secret
+              key: client-secret
         image: {{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: rucio-datalink

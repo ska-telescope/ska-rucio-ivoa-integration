@@ -7,7 +7,7 @@ image:
 namespace: rucio-ivoa-integration
 
 config:
-  dataManagementApiEndpoint: https://data-management.srcdev.skao.int/api/v1
+  dataManagementApiUrl: https://data-management.srcdev.skao.int/api/v1
   dataManagementApiClientScopes: openid profile data-management-api-service
   dataManagementApiClientAudience: data-management-api
   ivoaAuthority: auth.example.org/datasets/fits

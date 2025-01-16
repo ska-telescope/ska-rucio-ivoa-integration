@@ -100,13 +100,13 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
     #
     metadata = {}
     replicas_by_rse = None
-    if config.get("DATA_MANAGEMENT_ENDPOINT", default=None):
+    if config.get("DATA_MANAGEMENT_API_URL", default=None):
         dm_client = DataManagementServiceToken()
         dm_token = dm_client.get_token()
 
         dm_session = requests.Session()
         dm_session.headers.update({'Authorization': 'Bearer {}'.format(dm_token)})
-        data_management = DataManagementClient(config.get('DATA_MANAGEMENT_ENDPOINT'), session=dm_session)
+        data_management = DataManagementClient(config.get('DATA_MANAGEMENT_API_URL'), session=dm_session)
 
         metadata = data_management.get_metadata(namespace=scope, name=name).json()
 
