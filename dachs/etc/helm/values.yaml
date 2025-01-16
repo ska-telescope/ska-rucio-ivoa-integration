@@ -8,7 +8,7 @@ namespace: rucio-ivoa-integration
 
 config:
   gavorc_server_url: https://dachs.ivoa.srcnet.skao.int:443
-  gavorc_server_port: 443
+  gavorc_server_port: 8080
   dachs_postgres_host: rucio-metadata-postgres-postgresql.rucio.svc.cluster.local
   dachs_postgres_dbname: metadata
   ivoa_authority: test.skao
