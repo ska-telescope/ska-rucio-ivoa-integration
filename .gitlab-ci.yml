@@ -4,6 +4,11 @@ services:
 
 stages:
 - build
+- build-and-publish
+
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: tcp://docker:2375/
 
 build:
   only:
@@ -17,6 +22,42 @@ build:
     - docker push $CI_REGISTRY_IMAGE/postgres-metadata:bitnami-dachs
     - docker build -t $CI_REGISTRY_IMAGE/rucio-datalink:latest rucio-datalink
     - docker push $CI_REGISTRY_IMAGE/rucio-datalink:latest
+
+build-and-publish-dachs:
+  stage: build-and-publish
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - echo "Building Dachs image for branch: $CI_COMMIT_REF_SLUG"
+  script:
+    - echo "Building Dachs image"
+    - echo "$CI_REGISTRY_IMAGE/dachs:$CI_COMMIT_REF_SLUG"
+    - docker build -t "$CI_REGISTRY_IMAGE/dachs:$CI_COMMIT_REF_SLUG" dachs
+    - echo "Pushing Dachs image to $CI_REGISTRY"
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+    - docker push "$CI_REGISTRY_IMAGE/dachs:$CI_COMMIT_REF_SLUG"
+    - echo "Successfully published Dachs image"
+  only:
+    - branches
+
+build-and-publish-postgres-metadata:
+  stage: build-and-publish
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - echo "Building Postgres Metadata image for branch: $CI_COMMIT_REF_SLUG"
+  script:
+    - echo "Building Postgres Metadata image"
+    - echo "$CI_REGISTRY_IMAGE/postgres-metadata:$CI_COMMIT_REF_SLUG"
+    - docker build -f postgres-metadata/Dockerfile.bitnami --build-arg POSTGRES_INIT_DIR=dachs -t "$CI_REGISTRY_IMAGE/postgres-metadata:$CI_COMMIT_REF_SLUG" postgres-metadata
+    - echo "Pushing Postgres Metadata image to $CI_REGISTRY"
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+    - docker push "$CI_REGISTRY_IMAGE/postgres-metadata:$CI_COMMIT_REF_SLUG"
+    - echo "Successfully published Postgres Metadata image"
+  only:
+    - branches
 
 helm-publish:
   only:
