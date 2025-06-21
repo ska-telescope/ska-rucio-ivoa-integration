@@ -28,8 +28,6 @@ build-and-publish-dachs:
   image: docker:latest
   services:
     - docker:dind
-  before_script:
-    - echo "Building Dachs image for branch: $CI_COMMIT_REF_SLUG"
   script:
     - echo "Building Dachs image"
     - echo "$CI_REGISTRY_IMAGE/dachs:$CI_COMMIT_REF_SLUG"
@@ -46,8 +44,6 @@ build-and-publish-postgres-metadata:
   image: docker:latest
   services:
     - docker:dind
-  before_script:
-    - echo "Building Postgres Metadata image for branch: $CI_COMMIT_REF_SLUG"
   script:
     - echo "Building Postgres Metadata image"
     - echo "$CI_REGISTRY_IMAGE/postgres-metadata:$CI_COMMIT_REF_SLUG"
