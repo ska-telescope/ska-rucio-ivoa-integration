@@ -47,7 +47,7 @@ build-and-publish-postgres-metadata:
   script:
     - echo "Building Postgres Metadata image"
     - echo "$CI_REGISTRY_IMAGE/postgres-metadata:$CI_COMMIT_REF_SLUG"
-    - docker build -f postgres-metadata/Dockerfile.bitnami --build-arg POSTGRES_INIT_DIR=dachs -t "$CI_REGISTRY_IMAGE/postgres-metadata:$CI_COMMIT_REF_SLUG" postgres-metadata
+    - docker build -f postgres-metadata/Dockerfile.postgres --build-arg POSTGRES_INIT_DIR=dachs -t "$CI_REGISTRY_IMAGE/postgres-metadata:$CI_COMMIT_REF_SLUG" postgres-metadata
     - echo "Pushing Postgres Metadata image to $CI_REGISTRY"
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
     - docker push "$CI_REGISTRY_IMAGE/postgres-metadata:$CI_COMMIT_REF_SLUG"
