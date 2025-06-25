@@ -1,94 +1,107 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <VOTABLE xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.4">
-    <RESOURCE type="results">
-        <TABLE>
-            <FIELD name="ID" datatype="char" arraysize="*" ucd="meta.id;meta.main" />
-            <FIELD name="access_url" datatype="char" arraysize="*" ucd="meta.ref.url" />
-            <FIELD name="service_def" datatype="char" arraysize="*" ucd="meta.ref" />
-            <FIELD name="error_message" datatype="char" arraysize="*" ucd="meta.code.error" />
-            <FIELD name="semantics" datatype="char" arraysize="*" ucd="meta.code" />
-            <FIELD name="description" datatype="char" arraysize="*" ucd="meta.note" />
-            <FIELD name="content_type" datatype="char" arraysize="*" ucd="meta.code.mime" />
-            <FIELD name="content_length" datatype="long" ucd="phys.size;meta.file" unit="byte" />
-            <FIELD name="content_qualifier" datatype="char" arraysize="*" ucd="meta.code" />
-            <DATA>
-                <TABLEDATA>
-                    <TR>
-                        <TD>ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
-                        <TD>{{ access_url }}</TD>
-                        <TD />
-                        <TD />
-                        <TD>#this</TD>
-                        <TD>{{ description }}</TD>
-                        <TD>{{ content_type }}</TD>
-                        <TD>{{ content_length }}</TD>
-                        <TD />
-                    </TR>
-                    {% for datalink in datalinks %}
-                    <TR>
-                        <TD>ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
-                        <TD>{{ datalink.access_url }}</TD>
-                        <TD />
-                        <TD />
-                        <TD>{{ datalink.semantics }}</TD>
-                        <TD>{{ datalink.description }}</TD>
-                        <TD>application/x-votable+xml;content=datalink</TD>
-                        <TD />
-                        <TD />
-                    </TR>
-                    {% endfor %}
-                    {% if include_soda %}
-                    <TR>
-                        <TD>ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
-                        <TD />
-                        <TD>soda-sync</TD>
-                        <TD />
-                        <TD>#cutout</TD>
-                        <TD>SODA-sync cutout of ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
-                        <TD>{{ content_type }}</TD>
-                        <TD />
-                        <TD />
-                    </TR>
+<RESOURCE type="results">
+    <TABLE>
+        <FIELD name="ID" datatype="char" arraysize="*" ucd="meta.id;meta.main" />
+        <FIELD name="access_url" datatype="char" arraysize="*" ucd="meta.ref.url" />
+        <FIELD name="service_def" datatype="char" arraysize="*" ucd="meta.ref" />
+        <FIELD name="error_message" datatype="char" arraysize="*" ucd="meta.code.error" />
+        <FIELD name="semantics" datatype="char" arraysize="*" ucd="meta.code" />
+        <FIELD name="description" datatype="char" arraysize="*" ucd="meta.note" />
+        <FIELD name="content_type" datatype="char" arraysize="*" ucd="meta.code.mime" />
+        <FIELD name="content_length" datatype="long" ucd="phys.size;meta.file" unit="byte" />
+        <FIELD name="content_qualifier" datatype="char" arraysize="*" ucd="meta.code" />
+        <DATA>
+            <TABLEDATA>
+                <TR>
+                    <TD>ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
+                    <TD>{{ access_url }}</TD>
+                    <TD />
+                    <TD />
+                    <TD>#this</TD>
+                    <TD>{{ description }}</TD>
+                    <TD>{{ content_type }}</TD>
+                    <TD>{{ content_length }}</TD>
+                    <TD />
+                </TR>
+                {% for datalink in datalinks %}
+                <TR>
+                    <TD>ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
+                    <TD>{{ datalink.access_url }}</TD>
+                    <TD />
+                    <TD />
+                    <TD>{{ datalink.semantics }}</TD>
+                    <TD>{{ datalink.description }}</TD>
+                    <TD>application/x-votable+xml;content=datalink</TD>
+                    <TD />
+                    <TD />
+                </TR>
+                {% endfor %}
+
+                {# Iterar dinámicamente por todos los servicios incluidos #}
+                {% for stype, service in services.items() %}
+                    {% if attribute(_context, 'include_' ~ stype) %}
                     <TR>
                         <TD>ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
                         <TD />
-                        <TD>soda-async</TD>
+                        <TD>{{ stype }}</TD>
                         <TD />
-                        <TD>#cutout</TD>
-                        <TD>SODA-async cutout of ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
+                        <TD>#{{ stype }}</TD>
+                        <TD>{{ stype | replace('_', '-') }} service of ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
                         <TD>{{ content_type }}</TD>
                         <TD />
                         <TD />
                     </TR>
                     {% endif %}
-                </TABLEDATA>
-            </DATA>
-        </TABLE>
-    </RESOURCE>
-    {% if include_soda %}
-    <RESOURCE type="meta" ID="soda-sync" utype="adhoc:service">
-        <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ soda_sync_resource_identifier | length }}"  value="{{ soda_sync_resource_identifier }}" />
-        <PARAM name="accessURL" datatype="char" arraysize="{{ soda_sync_access_url | length }}" value="{{ soda_sync_access_url }}" />
-        <GROUP name="inputParams">
-            <PARAM name="ID" datatype="char" arraysize="{{ ('ivo://' ~ ivoa_authority ~ '?' ~ path_on_storage) | length }}" ucd="meta.id;meta.dataset" value="ivo://{{ ivoa_authority }}?{{ path_on_storage }}" />
-            <PARAM name="POS" datatype="char" arraysize="*" ucd="obs.field" value="" />
-            <PARAM name="CIRCLE" datatype="double" arraysize="3" ucd="obs.field" unit="deg" xtype="circle" value=""/>
-            <PARAM name="BAND" unit="m" ucd="em.wl;stat.interval" datatype="double" arraysize="2" xtype="interval" value=""/>
-            <PARAM name="TIME" unit="d" ucd="time.interval;obs.exposure" datatype="double" arraysize="2" xtype="interval" value=""/>
-            <PARAM name="POL" ucd="meta.code;phys.polarization" datatype="char" arraysize="*" value=""/>
-        </GROUP>
-    </RESOURCE>
-    <RESOURCE type="meta" ID="soda-async" utype="adhoc:service">
-        <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ soda_async_resource_identifier | length }}"  value="{{ soda_async_resource_identifier }}" />
-        <PARAM name="accessURL" datatype="char" arraysize="{{ soda_async_access_url | length }}" value="{{ soda_async_access_url }}" />
-        <GROUP name="inputParams">
-            <PARAM name="ID" datatype="char" arraysize="{{ ('ivo://' ~ ivoa_authority ~ '?' ~ path_on_storage) | length }}" ucd="meta.id;meta.dataset" value="ivo://{{ ivoa_authority }}?{{ path_on_storage }}" />
-            <PARAM name="POS" datatype="char" arraysize="*" ucd="obs.field" value="" />
-            <PARAM name="CIRCLE" datatype="double" arraysize="3" ucd="obs.field" unit="deg" xtype="circle" value=""/>
-            <PARAM name="BAND" unit="m" ucd="em.wl;stat.interval" datatype="double" arraysize="2" xtype="interval" value=""/>
-            <PARAM name="TIME" unit="d" ucd="time.interval;obs.exposure" datatype="double" arraysize="2" xtype="interval" value=""/>
-            <PARAM name="POL" ucd="meta.code;phys.polarization" datatype="char" arraysize="*" value=""/>
-        </GROUP>
-    </RESOURCE>
-    {% endif %}
+                {% endfor %}
+
+            </TABLEDATA>
+        </DATA>
+    </TABLE>
+</RESOURCE>
+
+{# Resource sections for each included service #}
+{% if include_soda_sync %}
+<RESOURCE type="meta" ID="soda-sync" utype="adhoc:service">
+    <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ services.soda_sync.resource_identifier | length }}" value="{{ services.soda_sync.resource_identifier }}" />
+    <PARAM name="accessURL" datatype="char" arraysize="{{ services.soda_sync.access_url | length }}" value="{{ services.soda_sync.access_url }}" />
+    <GROUP name="inputParams">
+        <PARAM name="ID" datatype="char" arraysize="{{ ('ivo://' ~ ivoa_authority ~ '?' ~ path_on_storage) | length }}" ucd="meta.id;meta.dataset" value="ivo://{{ ivoa_authority }}?{{ path_on_storage }}" />
+        <PARAM name="POS" datatype="char" arraysize="*" ucd="obs.field" value="" />
+        <PARAM name="CIRCLE" datatype="double" arraysize="3" ucd="obs.field" unit="deg" xtype="circle" value=""/>
+        <PARAM name="BAND" unit="m" ucd="em.wl;stat.interval" datatype="double" arraysize="2" xtype="interval" value=""/>
+        <PARAM name="TIME" unit="d" ucd="time.interval;obs.exposure" datatype="double" arraysize="2" xtype="interval" value=""/>
+        <PARAM name="POL" ucd="meta.code;phys.polarization" datatype="char" arraysize="*" value=""/>
+    </GROUP>
+</RESOURCE>
+{% endif %}
+
+{% if include_soda_async %}
+<RESOURCE type="meta" ID="soda-async" utype="adhoc:service">
+    <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ services.soda_async.resource_identifier | length }}" value="{{ services.soda_async.resource_identifier }}" />
+    <PARAM name="accessURL" datatype="char" arraysize="{{ services.soda_async.access_url | length }}" value="{{ services.soda_async.access_url }}" />
+    <GROUP name="inputParams">
+        <PARAM name="ID" datatype="char" arraysize="{{ ('ivo://' ~ ivoa_authority ~ '?' ~ path_on_storage) | length }}" ucd="meta.id;meta.dataset" value="ivo://{{ ivoa_authority }}?{{ path_on_storage }}" />
+        <PARAM name="POS" datatype="char" arraysize="*" ucd="obs.field" value="" />
+        <PARAM name="CIRCLE" datatype="double" arraysize="3" ucd="obs.field" unit="deg" xtype="circle" value=""/>
+        <PARAM name="BAND" unit="m" ucd="em.wl;stat.interval" datatype="double" arraysize="2" xtype="interval" value=""/>
+        <PARAM name="TIME" unit="d" ucd="time.interval;obs.exposure" datatype="double" arraysize="2" xtype="interval" value=""/>
+        <PARAM name="POL" ucd="meta.code;phys.polarization" datatype="char" arraysize="*" value=""/>
+    </GROUP>
+</RESOURCE>
+{% endif %}
+
+{% if include_gaussconv %}
+<RESOURCE type="meta" ID="gaussconv" utype="adhoc:service">
+    <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ services.gaussconv.resource_identifier | length }}" value="{{ services.cutout_v2.resource_identifier }}" />
+    <PARAM name="accessURL" datatype="char" arraysize="{{ services.gaussconv.access_url | length }}" value="{{ services.gaussconv.access_url }}" />
+    <GROUP name="inputParams">
+        <PARAM name="SIGMA" datatype="double" value="1.0" />
+
+    </GROUP>
+</RESOURCE>
+{% endif %}
+
+{% endfor %}
+
 </VOTABLE>

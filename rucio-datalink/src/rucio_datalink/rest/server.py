@@ -4,7 +4,7 @@ import json
 import os
 import random
 import requests
-from typing import Union, Optional
+from typing import Union, Optional, List, Dict
 
 from authlib.integrations.requests_client import OAuth2Session
 from fastapi import FastAPI, HTTPException, Request, status
@@ -33,8 +33,9 @@ app.add_middleware(
 # Instantiate an OAuth2 request session for the data-management-api.
 #
 DATA_MANAGEMENT_CLIENT = OAuth2Session(config.get("DATA_MANAGEMENT_CLIENT_ID"),
-                                         config.get("DATA_MANAGEMENT_CLIENT_SECRET"),
-                                         scope=config.get("DATA_MANAGEMENT_CLIENT_SCOPES", default=""))
+                                       config.get(
+                                           "DATA_MANAGEMENT_CLIENT_SECRET"),
+                                       scope=config.get("DATA_MANAGEMENT_CLIENT_SCOPES", default=""))
 
 templates = Jinja2Templates(directory="templates")
 
@@ -78,6 +79,24 @@ class DataManagementServiceToken(ServiceToken):
         )
 
 
+def build_service_info(service):
+    """Extract relevant info from a single service dict."""
+    other_attrs = service.get('other_attributes', {})
+    resource_identifier = (
+        other_attrs.get('resourceIdentifier', {}).get('value', '') or ''
+    )
+    access_url = "{prefix}://{host}:{port}/{path}".format(
+        prefix=service.get('prefix', ''),
+        host=service.get('host', ''),
+        port=service.get('port', ''),
+        path=service.get('path', '').lstrip('/')
+    )
+    return {
+        'resource_identifier': resource_identifier,
+        'access_url': access_url,
+    }
+
+
 @app.get('/ping')
 async def ping(request: Request):
     """ Service aliveness. """
@@ -89,7 +108,36 @@ async def ping(request: Request):
 
 @app.get('/links', response_class=HTMLResponse)
 async def links(id, request: Request, client_ip_address: str = None, sort: str = 'random',
-                must_include_soda: bool = False, ranking: int = 0) -> Union[templates.TemplateResponse, HTTPException]:
+                str_services: str = None, ranking: int = 0) -> Union[templates.TemplateResponse, HTTPException]:
+    '''
+
+
+    Parameters
+    ----------
+    id : TYPE
+        DESCRIPTION.
+    request : Request
+        DESCRIPTION.
+    client_ip_address : str, optional
+        DESCRIPTION. The default is None.
+    sort : str, optional
+        DESCRIPTION. The default is 'random'.
+    str_services : str, optional
+        string with list of services separted by comma. The default is None.
+        ej: "soda_sync, soda_async, gauss_conv"
+    ranking : int, optional
+        DESCRIPTION. The default is 0.
+
+    Raises
+    ------
+    HTTPException
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    '''
     try:
         scope, name = id.split(':')
     except ValueError:
@@ -105,83 +153,111 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         dm_token = dm_client.get_token()
 
         dm_session = requests.Session()
-        dm_session.headers.update({'Authorization': 'Bearer {}'.format(dm_token)})
-        data_management = DataManagementClient(config.get('DATA_MANAGEMENT_API_URL'), session=dm_session)
+        dm_session.headers.update(
+            {'Authorization': 'Bearer {}'.format(dm_token)})
+        data_management = DataManagementClient(config.get(
+            'DATA_MANAGEMENT_API_URL'), session=dm_session)
 
-        metadata = data_management.get_metadata(namespace=scope, name=name).json()
+        metadata = data_management.get_metadata(
+            namespace=scope, name=name).json()
 
-        replicas_by_rse = {}
+        # Get list of replicas
+        location_response = data_management.locate_replicas_of_file(
+            namespace=scope,
+            name=name,
+            sort=sort,
+            ip_address=client_ip_address,
+            colocated_services=str_services
+        ).json()
 
-        if must_include_soda:
-            soda_sync_services_by_rse = {}
-            soda_async_services_by_rse = {}
-            # Get list of replicas colocated with SODA services
-            location_response = data_management.locate_replicas_of_file(
-                namespace=scope,
-                name=name,
-                sort=sort,
-                ip_address=client_ip_address,
-                colocated_services="soda_sync, soda_async"                                                              #FIXME: Just SODA for now.
-            ).json()
-
-            # Sort response into replicas by RSE and SODA services by RSE
-            for entry in location_response:
-                rse = entry.get('identifier')
-                replicas = entry.get('replicas')
-                colocated_services = entry.get('colocated_services')
-
-                replicas_by_rse[rse] = replicas
-                soda_sync_services_by_rse[rse] = [
-                    service for service in colocated_services if service.get('type') == 'soda_sync']
-                soda_async_services_by_rse[rse] = [
-                    service for service in colocated_services if service.get('type') == 'soda_async']
+        #  Parse service types from string
+        if str_services:
+            service_types = [s.strip() for s in str_services.split(',')]
         else:
-            location_response = data_management.locate_replicas_of_file(
-                namespace=scope,
-                name=name,
-                sort=sort,
-                ip_address=client_ip_address
-            ).json()
+            service_types = []
 
-            for entry in location_response:
-                rse = entry.get('identifier')
-                replicas = entry.get('replicas')
+        # To store replicas and services grouped by type and RSE identifier
+        replicas_by_rse = {}
+        services_by_rse = {stype: {} for stype in service_types}
 
+        # Iterate over each entry in the location response
+        for entry in location_response:
+            rse = entry.get('identifier')
+            replicas = entry.get('replicas', [])
+
+            if rse and replicas:
                 replicas_by_rse[rse] = replicas
 
-        if not replicas_by_rse:
-            raise HTTPException(status.HTTP_204_NO_CONTENT)
+            # Get colocated services for this RSE (default to empty list)
+            colocated_services = entry.get("colocated_services", [])
+
+            # Filter colocated services by each service type
+            for stype in service_types:
+                filtered_services = [
+                    service for service in colocated_services
+                    if service.get("type") == stype
+                ]
+                # Store filtered services under their type and RSE identifier
+                services_by_rse[stype][rse] = filtered_services
+
+    if not replicas_by_rse:
+        raise HTTPException(status.HTTP_204_NO_CONTENT)
 
     # Select the RSE (by ranking) and replica (randomly)
     if ranking > len(replicas_by_rse)-1:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Ranking is greater than number of replicas.")
-    selected_rse = list(replicas_by_rse.keys())[ranking]
-    selected_rse_replica = random.choice(replicas_by_rse[selected_rse])
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
+                            "Ranking is greater than number of replicas.")
 
-    # Return populated Datalink XML result
+    # Select the RSE (by ranking) and replica (randomly)
+    selected_rse = list(replicas_by_rse.keys())[ranking]
+
+    if not replicas_by_rse[selected_rse]:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT,
+                            detail=f"No replicas found for RSE {selected_rse}")
+
+    selected_rse_replica = random.choice(replicas_by_rse[selected_rse])
     access_url = selected_rse_replica
-    soda_sync_service = {}
-    soda_async_service = {}
-    if must_include_soda:
-        soda_sync_service = random.choice(soda_sync_services_by_rse[selected_rse])
-        soda_async_service = random.choice(soda_async_services_by_rse[selected_rse])
-    return templates.TemplateResponse("datalink.template.xml", {
-        "request": request,
-        "ivoa_authority": config.get('IVOA_AUTHORITY'),
-        "path_on_storage": "{}/{}".format(scope, access_url.split(scope)[1].lstrip('/')),                               #FIXME: this doesn't necessarily work for non-deterministic, need to look it up
-        "access_url": access_url,
-        "description": metadata.get('obs_id', ''),
-        "content_type": metadata.get('content_type', ''),
-        "content_length": metadata.get('content_length', ''),
-        "datalinks": ast.literal_eval(metadata.get('datalinks', '[]')),
-        "include_soda": must_include_soda,
-        "soda_sync_resource_identifier": soda_sync_service.get('other_attributes', {}).get(
-            'resourceIdentifier', {}).get('value', None) or '',    # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
-        "soda_sync_access_url": "{}://{}:{}/{}".format(soda_sync_service.get('prefix'), soda_sync_service.get('host'),
-                                                       soda_sync_service.get('port'), soda_sync_service.get('path', "").lstrip('/')),
-        "soda_async_resource_identifier": soda_async_service.get('other_attributes', {}).get(
-            'resourceIdentifier', {}).get('value', None) or '',     # e.g. {"resourceIdentifier": {"value": "ivo://skao.src/spsrc-soda/"}}
-        "soda_async_access_url": "{}://{}:{}/{}".format(soda_async_service.get('prefix'), soda_async_service.get('host'),
-                                                        soda_async_service.get('port'), soda_async_service.get('path', "").lstrip('/')),
-    }, media_type="application/xml")
+
+    # Select one random service per service type for the selected RSE,
+    selected_services = {}
+    for stype in service_types:
+        services_list = services_by_rse.get(stype, {}).get(selected_rse, [])
+        if services_list:
+            selected_services[stype] = random.choice(services_list)
+        else:
+            selected_services[stype] = None
+
+    # Build a dictionary with extracted service info for the template
+    services_info = {
+        stype: build_service_info(service)
+        for stype, service in selected_services.items()
+        if service is not None
+    }
+
+    include_services_flags = {
+        stype: (selected_services.get(stype) is not None)
+        for stype in service_types
+    }
+
+    return templates.TemplateResponse(
+        "datalink.template.xml",
+        {
+            "request": request,
+            "ivoa_authority": config.get('IVOA_AUTHORITY'),
+            # FIXME: this doesn't necessarily work for non-deterministic
+            "path_on_storage": "{}/{}".format(
+                scope,
+                access_url.split(scope)[1].lstrip('/')),
+            "access_url": access_url,
+            "description": metadata.get('obs_id', ''),
+            "content_type": metadata.get('content_type', ''),
+            "content_length": metadata.get('content_length', ''),
+            "datalinks": ast.literal_eval(metadata.get('datalinks', '[]')),
+            "services": services_info,
+            **{f"include_{stype}": include_services_flags[stype]
+               for stype in include_services_flags},
+        },
+        media_type="application/xml"
+    )
+
 
