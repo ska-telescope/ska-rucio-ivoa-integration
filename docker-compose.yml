@@ -70,7 +70,7 @@ services:
       - DATA_MANAGEMENT_CLIENT_ID=0ab39d2f-5428-484b-815d-dadfbad17416
       - DATA_MANAGEMENT_CLIENT_SCOPES=openid profile data-management-api-service
       - DATA_MANAGEMENT_CLIENT_AUDIENCE=data-management-api
-      - DATA_MANAGEMENT_ENDPOINT=https://data-management.srcdev.skao.int/api/v1
+      - DATA_MANAGEMENT_API_URL=https://data-management.srcnet.skao.int/api/v1
       - SERVICE_DATALINK_PORT=10000
       - IVOA_AUTHORITY=auth.example.org/datasets/fits
     env_file:
