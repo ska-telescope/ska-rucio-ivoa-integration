@@ -38,7 +38,7 @@
                 </TR>
                 {% endfor %}
 
-                {# Iterar dinámicamente por todos los servicios incluidos #}
+                {# Dinamically loop all the services #}
                 {% for stype, service in services.items() %}
                     {% if attribute(_context, 'include_' ~ stype) %}
                     <TR>
