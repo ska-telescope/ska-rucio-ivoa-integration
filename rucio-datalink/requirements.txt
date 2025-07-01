@@ -6,5 +6,8 @@ ipympl==0.9.3
 jinja2>=3.0.1
 liboidcagent==0.5.2
 requests>=2.24.0
-ska-src-data-management-api
+ska-src-auth-api==0.5.3
+ska-src-permissions-api==0.1.79
+ska-src-site-capabilities-api==0.3.60
+ska-src-data-management-api==0.6.8
 uvicorn[standard]==0.20.0
