@@ -33,8 +33,7 @@ app.add_middleware(
 # Instantiate an OAuth2 request session for the data-management-api.
 #
 DATA_MANAGEMENT_CLIENT = OAuth2Session(config.get("DATA_MANAGEMENT_CLIENT_ID"),
-                                       config.get(
-                                           "DATA_MANAGEMENT_CLIENT_SECRET"),
+                                       config.get("DATA_MANAGEMENT_CLIENT_SECRET"),
                                        scope=config.get("DATA_MANAGEMENT_CLIENT_SCOPES", default=""))
 
 templates = Jinja2Templates(directory="templates")
