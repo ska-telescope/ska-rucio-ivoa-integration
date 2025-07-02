@@ -4,19 +4,70 @@ services:
 
 stages:
 - build
+- build-and-publish
 
-build:
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: tcp://docker:2375/
+
+build-and-publish-dachs:
   only:
     - main
   stage: build
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_REGISTRY_IMAGE/dachs:latest dachs
-    - docker push $CI_REGISTRY_IMAGE/dachs:latest
-    - docker build -f postgres-metadata/Dockerfile.bitnami --build-arg POSTGRES_INIT_DIR=dachs -t $CI_REGISTRY_IMAGE/postgres-metadata:bitnami-dachs postgres-metadata
-    - docker push $CI_REGISTRY_IMAGE/postgres-metadata:bitnami-dachs
-    - docker build -t $CI_REGISTRY_IMAGE/rucio-datalink:latest rucio-datalink
-    - docker push $CI_REGISTRY_IMAGE/rucio-datalink:latest
+    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-dachs:latest dachs
+    - docker push ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-dachs:latest
+
+build-and-publish-postgres-metadata:
+  only:
+    - main
+  stage: build
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -f postgres-metadata/Dockerfile.bitnami --build-arg POSTGRES_INIT_DIR=dachs -t ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-postgres-metadata:bitnami-dachs postgres-metadata
+    - docker push ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-postgres-metadata:bitnami-dachs
+
+build-and-publish-rucio-datalink:
+  only:
+    - main
+  stage: build
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-rucio-datalink:latest rucio-datalink
+    - docker push ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-rucio-datalink:latest
+
+build-and-publish-dachs-integration:
+  stage: build-and-publish
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - echo "Building DaCHs image"
+    - echo "${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-dachs-integration:$CI_COMMIT_REF_SLUG"
+    - docker build -t "${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-dachs-integration:$CI_COMMIT_REF_SLUG" dachs
+    - echo "Pushing DaCHs image to $CI_REGISTRY"
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+    - docker push "${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-dachs-integration:$CI_COMMIT_REF_SLUG"
+    - echo "Successfully published DaCHs image"
+  only:
+    - branches
+
+build-and-publish-postgres-metadata-integration:
+  stage: build-and-publish
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - echo "Building Postgres metadata image"
+    - echo "${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-postgres-metadata-integration:$CI_COMMIT_REF_SLUG"
+    - docker build -f postgres-metadata/Dockerfile.postgres --build-arg POSTGRES_INIT_DIR=dachs -t "${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-postgres-metadata-integration:$CI_COMMIT_REF_SLUG" postgres-metadata
+    - echo "Pushing Postgres metadata image to $CI_REGISTRY"
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+    - docker push "${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-postgres-metadata-integration:$CI_COMMIT_REF_SLUG"
+    - echo "Successfully published Postgres metadata image"
+  only:
+    - branches
 
 helm-publish:
   only:
