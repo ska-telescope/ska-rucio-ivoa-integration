@@ -3,7 +3,6 @@ services:
 - docker:dind
 
 stages:
-- build
 - build-and-publish
 
 variables:
@@ -13,7 +12,7 @@ variables:
 build-and-publish-dachs:
   only:
     - main
-  stage: build
+  stage: build-and-publish
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker build -t ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-dachs:latest dachs
@@ -22,7 +21,7 @@ build-and-publish-dachs:
 build-and-publish-postgres-metadata:
   only:
     - main
-  stage: build
+  stage: build-and-publish
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker build -f postgres-metadata/Dockerfile.bitnami --build-arg POSTGRES_INIT_DIR=dachs -t ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-postgres-metadata:bitnami-dachs postgres-metadata
@@ -31,7 +30,7 @@ build-and-publish-postgres-metadata:
 build-and-publish-rucio-datalink:
   only:
     - main
-  stage: build
+  stage: build-and-publish
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker build -t ${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}/ska-src-mm-rucio-ivoa-integrations-rucio-datalink:latest rucio-datalink
@@ -69,10 +68,10 @@ build-and-publish-postgres-metadata-integration:
   only:
     - branches
 
-helm-publish:
+build-and-publish-helm:
   only:
     - main
-  stage: build
+  stage: build-and-publish
   image:
     name: alpine/helm:latest
     entrypoint: [""]
