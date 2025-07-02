@@ -68,10 +68,10 @@ build-and-publish-postgres-metadata-integration:
   only:
     - branches
 
-helm-publish:
+build-and-publish-helm:
   only:
     - main
-  stage: build
+  stage: build-and-publish
   image:
     name: alpine/helm:latest
     entrypoint: [""]
