@@ -102,6 +102,5 @@
 </RESOURCE>
 {% endif %}
 
-{% endfor %}
 
 </VOTABLE>
