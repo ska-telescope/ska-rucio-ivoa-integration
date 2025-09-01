@@ -33,7 +33,8 @@ app.add_middleware(
 # Instantiate an OAuth2 request session for the data-management-api.
 #
 DATA_MANAGEMENT_CLIENT = OAuth2Session(config.get("DATA_MANAGEMENT_CLIENT_ID"),
-                                       config.get("DATA_MANAGEMENT_CLIENT_SECRET"),
+                                       config.get(
+                                           "DATA_MANAGEMENT_CLIENT_SECRET"),
                                        scope=config.get("DATA_MANAGEMENT_CLIENT_SCOPES", default=""))
 
 templates = Jinja2Templates(directory="templates")
@@ -251,10 +252,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
             "content_length": metadata.get('content_length', ''),
             "datalinks": ast.literal_eval(metadata.get('datalinks', '[]')),
             "services": services_info,
-            **{f"include_{stype}": include_services_flags[stype]
-               for stype in include_services_flags},
+            "include_services_flags": include_services_flags,
         },
         media_type="application/xml"
     )
-
-
