@@ -40,7 +40,7 @@
 
                 {# Dinamically loop all the services #}
                 {% for stype, service in services.items() %}
-                    {% if attribute(_context, 'include_' ~ stype) %}
+                    {% if include_services_flags.get(stype, false) %}
                     <TR>
                         <TD>ivo://{{ ivoa_authority }}?{{ path_on_storage }}</TD>
                         <TD />
@@ -61,7 +61,7 @@
 </RESOURCE>
 
 {# Resource sections for each included service #}
-{% if include_soda_sync %}
+{% if include_services_flags.soda_sync %}
 <RESOURCE type="meta" ID="soda-sync" utype="adhoc:service">
     <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ services.soda_sync.resource_identifier | length }}" value="{{ services.soda_sync.resource_identifier }}" />
     <PARAM name="accessURL" datatype="char" arraysize="{{ services.soda_sync.access_url | length }}" value="{{ services.soda_sync.access_url }}" />
@@ -76,7 +76,7 @@
 </RESOURCE>
 {% endif %}
 
-{% if include_soda_async %}
+{% if include_services_flags.soda_async %}
 <RESOURCE type="meta" ID="soda-async" utype="adhoc:service">
     <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ services.soda_async.resource_identifier | length }}" value="{{ services.soda_async.resource_identifier }}" />
     <PARAM name="accessURL" datatype="char" arraysize="{{ services.soda_async.access_url | length }}" value="{{ services.soda_async.access_url }}" />
@@ -91,9 +91,9 @@
 </RESOURCE>
 {% endif %}
 
-{% if include_gaussconv %}
+{% if include_services_flags.gauss_conv %}
 <RESOURCE type="meta" ID="gaussconv" utype="adhoc:service">
-    <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ services.gaussconv.resource_identifier | length }}" value="{{ services.cutout_v2.resource_identifier }}" />
+    <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ services.gaussconv.resource_identifier | length }}" value="{{ services.gaussconv.resource_identifier }}" />
     <PARAM name="accessURL" datatype="char" arraysize="{{ services.gaussconv.access_url | length }}" value="{{ services.gaussconv.access_url }}" />
     <GROUP name="inputParams">
         <PARAM name="SIGMA" datatype="double" value="1.0" />
@@ -101,6 +101,5 @@
     </GROUP>
 </RESOURCE>
 {% endif %}
-
 
 </VOTABLE>
