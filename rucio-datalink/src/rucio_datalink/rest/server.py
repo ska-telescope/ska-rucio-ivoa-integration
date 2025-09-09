@@ -122,7 +122,7 @@ async def links(id, request: Request, client_ip_address: str = None, sort: str =
         DESCRIPTION. The default is 'random'.
     str_services : str, optional
         string with list of services separted by comma. The default is None.
-        example: "soda_sync, soda_async, gauss_conv"
+        example: "soda_sync, soda_async, gaussconv"
     ranking : int, optional
         DESCRIPTION. The default is 0.
 
