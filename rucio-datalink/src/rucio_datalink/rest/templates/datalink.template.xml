@@ -91,7 +91,7 @@
 </RESOURCE>
 {% endif %}
 
-{% if include_services_flags.gauss_conv %}
+{% if include_services_flags.gaussconv %}
 <RESOURCE type="meta" ID="gaussconv" utype="adhoc:service">
     <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ services.gaussconv.resource_identifier | length }}" value="{{ services.gaussconv.resource_identifier }}" />
     <PARAM name="accessURL" datatype="char" arraysize="{{ services.gaussconv.access_url | length }}" value="{{ services.gaussconv.access_url }}" />
