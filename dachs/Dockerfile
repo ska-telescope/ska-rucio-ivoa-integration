@@ -7,7 +7,11 @@ ENV DACHS_POSTGRES_HOST=postgres-metadata
 ENV DACHS_POSTGRES_DBNAME=metadata
 ENV IVOA_AUTHORITY=test.skao
 
-RUN apt-get update -y && apt-get install -y gettext-base odbc-postgresql python3-pyodbc
+# MAM: Clean up problematic repositories before installing
+RUN rm -rf /etc/apt/sources.list.d/* \
+ && apt-get update -y \
+ && apt-get install -y --no-install-recommends gettext-base odbc-postgresql python3-pyodbc
+
 
 # copy in template gavo config 
 COPY etc/dachs/gavo.rc.template /tmp/gavo.rc.template
