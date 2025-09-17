@@ -96,8 +96,8 @@
     <PARAM name="resourceIdentifier" datatype="char" arraysize="{{ services.gaussconv.resource_identifier | length }}" value="{{ services.gaussconv.resource_identifier }}" />
     <PARAM name="accessURL" datatype="char" arraysize="{{ services.gaussconv.access_url | length }}" value="{{ services.gaussconv.access_url }}" />
     <GROUP name="inputParams">
+        <PARAM name="ID" datatype="char" arraysize="{{ ('ivo://' ~ ivoa_authority ~ '?' ~ path_on_storage) | length }}" ucd="meta.id;meta.dataset" value="ivo://{{ ivoa_authority }}?{{ path_on_storage }}" />
         <PARAM name="SIGMA" datatype="double" value="1.0" />
-
     </GROUP>
 </RESOURCE>
 {% endif %}
