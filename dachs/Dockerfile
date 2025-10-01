@@ -7,6 +7,11 @@ ENV DACHS_POSTGRES_HOST=postgres-metadata
 ENV DACHS_POSTGRES_DBNAME=metadata
 ENV IVOA_AUTHORITY=test.skao
 
+# get the new GAVO APT repository key
+RUN echo "deb http://vo.ari.uni-heidelberg.de/debian release main" \
+        > /etc/apt/sources.list.d/gavo.list                         && \
+    wget -qO - http://docs.g-vo.org/archive-key.asc | apt-key add -
+
 RUN apt-get update -y && apt-get install -y gettext-base odbc-postgresql python3-pyodbc
 
 # copy in template gavo config 
