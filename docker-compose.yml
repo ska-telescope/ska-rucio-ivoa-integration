@@ -81,6 +81,17 @@ services:
       - ./rucio-datalink/src:/opt/rucio_datalink/src:rw
     networks:
       - common
+  
+  youcat:
+    container_name: youcat
+    image: images.opencadc.org/core/youcat:0.7.7
+    ports:
+      - "9090:8080"
+    volumes:
+      - ./youcat/config:/config:ro
+    networks:
+      - common
+    
 networks:
   common:
     driver: bridge
