@@ -10,7 +10,7 @@ spec:
     http:
       paths:
       - path: /rucio(/|$)(.*)
-        pathType: Prefix
+        pathType: ImplementationSpecific
         backend:
           service:
             name: rucio-datalink
