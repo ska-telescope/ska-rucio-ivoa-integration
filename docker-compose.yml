@@ -29,6 +29,8 @@ services:
       - POSTGRES_DB=metadata
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=secret
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
     networks:
       - common
     command:
@@ -81,10 +83,14 @@ services:
       - ./rucio-datalink/src:/opt/rucio_datalink/src:rw
     networks:
       - common
-  
+
   youcat:
     container_name: youcat
-    image: images.opencadc.org/core/youcat:0.7.7
+    image: youcat
+    platform: linux/amd64
+    build:
+      context: ./youcat
+      dockerfile: Dockerfile
     ports:
       - "9090:8080"
     volumes:

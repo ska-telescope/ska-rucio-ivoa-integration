@@ -6,15 +6,13 @@ CREATE USER tapadm;
 CREATE USER gavoadmin;
 
 -- create TAP schemas
-CREATE SCHEMA tap_schema;
+CREATE SCHEMA tap_schema AUTHORIZATION gavoadmin;
 CREATE SCHEMA tap_upload AUTHORIZATION tapuser;
 CREATE SCHEMA uws AUTHORIZATION tapadm;
 
 -- apply permissions
 GRANT CREATE ON SCHEMA tap_schema TO tapadm;
 GRANT USAGE ON SCHEMA tap_schema TO tapadm;
-GRANT USAGE ON SCHEMA tap_schema TO public;
-GRANT SELECT ON ALL TABLES IN SCHEMA tap_schema TO public;
 
 -- give gavoadmin it's expected permissions of create and usage on the tap_schema
 GRANT CREATE ON SCHEMA tap_schema TO gavoadmin;

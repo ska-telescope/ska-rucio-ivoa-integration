@@ -1,0 +1,6 @@
+<vosi:tableset xmlns:vosi="http://www.ivoa.net/xml/VOSITables/v1.0">
+	<schema>
+		<name>rucio</name>
+		<description>RUCIO schema</description>
+    </schema>
+</vosi:tableset>
