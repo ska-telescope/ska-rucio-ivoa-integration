@@ -86,11 +86,8 @@ services:
 
   youcat:
     container_name: youcat
-    image: youcat
+    image: images.opencadc.org/core/youcat:0.8.0
     platform: linux/amd64
-    build:
-      context: ./youcat
-      dockerfile: Dockerfile
     ports:
       - "9090:8080"
     volumes:
