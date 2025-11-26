@@ -1,19 +1,21 @@
 ## Creating an ivoa.obscore view on the rucio.obscore table
 
-`youcat` can import existing schemas and tables in the database into the tap_schema using the `table-update` endpoint. This requires that `youcat` is configured with an admin user as described above.
-To create a view in the tap_schema called `ivoa.obscore` on the `rucio.obscore` table, use the following `curl` commands:
+To ingest a table into `youcat`, it first must be configured with an admin user as described in the repository [README](../README.md).
+
+To intest the `rucio.obscore` table into `youcat` as an `ivoa.obscore` , use the following procedure:
 
 1. Setup authentication
 
-First export your IAM client id, and update your IAM token.
+First export your IAM client id, and update and export your IAM token.
 
 ```bash
-export CLIENT_ID="abcdefgh-1234-5678-90d0-ijklmnopqrst"
+export CLIENT_ID="<client id>"
+export SKA_IAM_TOKEN="<SKA IAM token>"
 ```
 
-2. Add the ivoa and rucio schemas to the youcat tap_schema
+2. Add the ivoa schema to the youcat tap_schema
 
-To ingest the rucio.obscore table into the tap_schema as a ivoa.obscore view, the ivoa schema must exist in the tap_schema. The schema can be added to `youcat` using the `\tables` endpoint, which enables adding and updating of tap_schema schemas, tables, and columns.
+The `ivoa` schema must exist in the `tap_schema` before a `ivoa.<table name>` table can be ingested. The schema can be added to the tap_schema using the `\tables` endpoint, which enables adding and updating of tap_schema schemas, tables, and columns.
 
 Add the ivoa schema to the tap_schema:
 ```bash
@@ -27,8 +29,8 @@ curl -v \
 
 3. Create an ivoa.obscore view on the rucio.obscore table
 
-Use the `youcat` `/table-update` endpoint to add content to the tap_schema.
-To ingest an existing table into the tap_schema as a view, POST a request to the `\table-update` endpoint with the following parameters:
+Use the `youcat` `/table-update` endpoint to ingest tables into to the tap_schema.
+To ingest a table into the tap_schema as a view, POST a request to the `\table-update` endpoint with the following parameters:
 - ingest = true
 - table = {fully qualified source table name <schema_name.table_name>}
 - view = {fully qualified view name <schema_name.table_name>}
@@ -42,7 +44,7 @@ curl -v -L \
 http://localhost:9090/youcat/table-update
 ```
 
-Running the above command returns the UWS job document created by the POST request:
+Running the command returns a UWS job document created by the POST request:
 ```
 <uws:job xmlns:uws="http://www.ivoa.net/xml/UWS/v1.0" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
   <uws:jobId>tr26z4dk1fmu41jz</uws:jobId>
@@ -64,15 +66,15 @@ Running the above command returns the UWS job document created by the POST reque
 </uws:job>
 ```
 
-4. Get the jobID from the document and export the jobID
+4. The jobID is used in subsequent commands. Export the jobID to use the environment variable.
 
 ```bash
-export JOB_ID="tr26z4dk1fmu41jz"
+export JOB_ID="<jobId>"
 ```
 
 5. Run the job by setting the job phase to run
 
-The job phase is created in the `pending` state, set the job phase to `run` to run the job
+The job is created in the `phase=PENDING` state, set the job state to `phase=RUN` to run the job.
 
 ``` bash
 curl -v \
@@ -83,8 +85,8 @@ http://localhost:9090/youcat/table-update/$JOB_ID/phase
 
 6. Check the job phase until PHASE = COMPLETED
 
-The table has been ingested as a view when the job phase is COMPLETED.
-If there was an error running the job, the job phase will be ERROR, and there will be an `INFO` element in the job document with an error message saying why the job failed. 
+The table has been ingested when the job phase is `phase=COMPLETED`.
+If there was an error running the job, the job state will be `phase=ERROR`, and there will be an `INFO` element in the job document with an error message about why the job failed. 
 
 ```bash
 curl -v \
@@ -145,7 +147,8 @@ returns a VOSI-table document describing the ivoa.obscore view:
 
 8. Augment the tap_schema metadata for the view
 
-The metadata for the `ivoa.obscore` view contains basic metadata, the column names and data types of the `rucio.obscore` table. To add additional metadata to the view, the VOSI-table document downloaded aboe can be updated, and the document posted back to `youcat`. The `youcat/ivoa-obscore-table-desc.xml` file is the basic VOSI-table document updated with additional metadata. Note: only existing columns can be updated, existing columns cannot be deleted and new columns cannot be added.
+The metadata for the `ivoa.obscore` view only contains basic metadata extracted from the database. The column names and data types of the `rucio.obscore` table. To add additional metadata to the view, the VOSI-table document downloaded above can be updated with additional metadata, and the document posted back to `youcat` to update the view metadata in the tap_schema. The `youcat/ivoa-obscore-table-desc.xml` file is the basic VOSI-table document updated with additional metadata. 
+Note: only existing columns in the tap_schema can be updated.
 To push this document back to `youcat`:
 
 ```bash
@@ -156,7 +159,7 @@ curl -v \
 -X POST http://localhost:9090/youcat/tables/ivoa.obscore
 ```
 
-You can query the TAP endpoint at [http://localhost:9090/youcat/sync](http://localhost:9090/youcat/sync) toget the contents of the `ivoa.obscore` view along with the updated view metadata.
+You can query the TAP endpoint at [http://localhost:9090/youcat/sync](http://localhost:9090/youcat/sync) to get the contents of the `ivoa.obscore` view along with the updated view metadata.
 
 ```bash
 curl -v -L \
