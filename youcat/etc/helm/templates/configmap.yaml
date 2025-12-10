@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: youcat-config
+  labels:
+    app: youcat
+data:
+
+  cadc-registry.properties: |
+    ca.nrc.cadc.reg.client.RegistryClient.baseURL = {{ .Values.ca.nrc.cadc.reg.client.RegistryClient.baseURL }}
+    ivo://ivoa.net/sso#OpenID = {{ .Values.ca.nrc.cadc.reg.client.RegistryClient.OpenID }}
+    ivo://ivoa.net/std/GMS#search-1.0 = {{ .Values.ca.nrc.cadc.reg.client.RegistryClient.GMS.search }}
+
+  catalina.properties: |
+    tomcat.connector.secure = {{ .Values.tomcat.connector.secure }}
+    tomcat.connector.scheme = {{ .Values.tomcat.connector.scheme }}
+    tomcat.connector.proxyName = {{ .Values.tomcat.connector.proxyName }}
+    tomcat.connector.proxyPort = {{ .Values.tomcat.connector.proxyPort }}
+
+    org.opencadc.youcat.tapadm.maxActive = {{ .Values.org.opencadc.youcat.tapadm.maxActive }}
+    org.opencadc.youcat.tapadm.username = {{ .Values.org.opencadc.youcat.tapadm.username }}
+    org.opencadc.youcat.tapadm.password = {{ .Values.org.opencadc.youcat.tapadm.password }}
+    org.opencadc.youcat.tapadm.url = {{ .Values.org.opencadc.youcat.tapadm.url }}
+
+    org.opencadc.youcat.tapuser.maxActive = {{ .Values.org.opencadc.youcat.tapuser.maxActive }}
+    org.opencadc.youcat.tapuser.username = {{ .Values.org.opencadc.youcat.tapuser.username }}
+    org.opencadc.youcat.tapuser.password = {{ .Values.org.opencadc.youcat.tapuser.password }}
+    org.opencadc.youcat.tapuser.url = {{ .Values.org.opencadc.youcat.tapuser.url }}
+
+    org.opencadc.youcat.uws.maxActive = {{ .Values.org.opencadc.youcat.uws.maxActive }}
+    org.opencadc.youcat.uws.username = {{ .Values.org.opencadc.youcat.uws.username }}
+    org.opencadc.youcat.uws.password = {{ .Values.org.opencadc.youcat.uws.password }}
+    org.opencadc.youcat.uws.url = {{ .Values.org.opencadc.youcat.uws.url }}
+
+    ca.nrc.cadc.auth.IdentityManager = {{ .Values.ca.nrc.cadc.auth.IdentityManager }}
+
+  cadc-tap-tmp.properties: |
+    org.opencadc.tap.tmp.StorageManager = {{ .Values.org.opencadc.tap.tmp.StorageManager }}
+    org.opencadc.tap.tmp.TempStorageManager.baseURL = {{ .Values.org.opencadc.tap.tmp.TempStorageManager.baseURL }}
+    org.opencadc.tap.tmp.TempStorageManager.baseStorageDir = {{ .Values.org.opencadc.tap.tmp.TempStorageManager.baseStorageDir }}
+
+
+  youcat.properties: |
+    org.opencadc.youcat.adminUser = {{ .Values.org.opencadc.youcat.adminUser }}
+    org.opencadc.youcat.createSchemaInDB = {{ .Values.org.opencadc.youcat.createSchemaInDB }}

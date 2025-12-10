@@ -49,7 +49,7 @@ Running the command returns a UWS job document created by the POST request:
 <uws:job xmlns:uws="http://www.ivoa.net/xml/UWS/v1.0" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
   <uws:jobId>tr26z4dk1fmu41jz</uws:jobId>
   <uws:runId />
-  <uws:ownerId>owner</uws:ownerId>
+  <uws:ownerId>ownerId</uws:ownerId>
   <uws:phase>PENDING</uws:phase>
   <uws:quote>2025-11-04T22:25:20.086Z</uws:quote>
   <uws:creationTime>2025-11-03T22:25:20.093Z</uws:creationTime>
@@ -98,7 +98,7 @@ returns
 <uws:job xmlns:uws="http://www.ivoa.net/xml/UWS/v1.0" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
   <uws:jobId>tr26z4dk1fmu41jz</uws:jobId>
   <uws:runId />
-  <uws:ownerId>owner</uws:ownerId>
+  <uws:ownerId>ownerId</uws:ownerId>
   <uws:phase>COMPLETED</uws:phase>
   <uws:quote>2025-11-04T22:25:20.086Z</uws:quote>
   <uws:creationTime>2025-11-03T22:25:20.093Z</uws:creationTime>
@@ -147,7 +147,7 @@ returns a VOSI-table document describing the ivoa.obscore view:
 
 8. Augment the tap_schema metadata for the view
 
-The metadata for the `ivoa.obscore` view only contains basic metadata extracted from the database. The column names and data types of the `rucio.obscore` table. To add additional metadata to the view, the VOSI-table document downloaded above can be updated with additional metadata, and the document posted back to `youcat` to update the view metadata in the tap_schema. The `youcat/ivoa-obscore-table-desc.xml` file is the basic VOSI-table document updated with additional metadata. 
+The metadata for the `ivoa.obscore` view contains only basic metadata extracted from the database. The column names and data types of the `rucio.obscore` table. To add additional metadata to the view, the VOSI-table document downloaded above can be updated with additional metadata, and the document posted back to `youcat` to update the view metadata in the tap_schema. The `youcat/ivoa-obscore-table-desc.xml` file is the basic VOSI-table document updated with additional metadata. 
 Note: only existing columns in the tap_schema can be updated.
 To push this document back to `youcat`:
 

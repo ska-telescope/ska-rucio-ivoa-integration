@@ -1,0 +1,88 @@
+# Default values for youcat Helm chart
+
+## Image configuration
+image:
+  repository: images.opencadc.org/core/youcat
+  tag: 0.8.0
+  pullPolicy: Always
+
+namespace: rucio-ivoa-integration
+
+## Ingress configuration
+ingress:
+  host: youcat.ivoa.srcnet.skao.int
+  enabled: true
+  tls:
+    enabled: true
+    secretName: youcat-tls-secret
+
+## Temporary storage configuration
+tempStorage:
+  # Base URL for temporary storage
+  baseURL: https://youcat.ivoa.srcnet.skao.int/youcat/tmp
+  # Directory in container for temporary storage
+  baseStorageDir: /tmp
+  # Whether to use persistent volume for temporary storage
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: standard
+    accessMode: ReadWriteOnce
+
+## ConfigMap configuration
+
+# cadc-registry.properties
+ca:
+  nrc:
+    cadc:
+      reg:
+        client:
+          RegistryClient:
+            baseURL: https://spsrc27.iaa.csic.es/reg
+            OpenID: https://ska-iam.stfc.ac.uk/
+            GMS:
+              search: ivo://skao.int/gms
+
+      # catalina.properties
+      auth:
+        IdentityManager: org.opencadc.auth.StandardIdentityManager
+
+# cadc-tap-tmp.properties
+org:
+  opencadc:
+    tap:
+      tmp:
+        StorageManager: org.opencadc.tap.tmp.TempStorageManager
+        TempStorageManager:
+          baseURL: https://youcat.ivoa.srcnet.skao.int/youcat/tmp
+          baseStorageDir: /tmp
+
+    # catalina.properties
+    youcat:
+      tapadm:
+        maxActive: 10
+        username: tapadm
+        password: pw-tapadm
+        url: jdbc:postgresql://postgres-metadata-postgresql:5432/metadata
+      tapuser:
+        maxActive: 10
+        username: tapuser
+        password: pw-tapuser
+        url: jdbc:postgresql://postgres-metadata-postgresql:5432/metadata
+      uws:
+        maxActive: 10
+        username: tapadm
+        password: pw-tapadm
+        url: jdbc:postgresql://postgres-metadata-postgresql:5432/metadata
+
+      # youcat.properties
+      adminUser: openid https://ska-iam.stfc.ac.uk/ 6cc69a9d-5f59-4816-90d0-dfb32d65a3d5
+      createSchemaInDB: false
+
+# catalina.properties
+tomcat:
+  connector:
+    secure: true
+    scheme: https
+    proxyName: youcat.ivoa.scrnet.skao.int
+    proxyPort: 443
