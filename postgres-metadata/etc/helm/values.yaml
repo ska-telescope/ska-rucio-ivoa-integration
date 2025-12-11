@@ -1,8 +1,7 @@
 image:
   registry: registry.gitlab.com
-  repository: ska-telescope/src/src-mm/ska-src-mm-rucio-ivoa-integrations
-  name: ska-src-mm-rucio-ivoa-integrations-postgres-metadata-integration
-  tag: main
+  repository: ska-telescope/src/src-mm/ska-src-rucio-ivoa-integrations/postgres-metadata
+  tag: bitnami-dachs
   pullPolicy: Always
 
 auth:

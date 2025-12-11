@@ -24,17 +24,6 @@ spec:
               mountPath: /config
             - name: temp-storage
               mountPath: /tmp
-          env:
-            - name: TAPADM_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: youcat-db-credentials
-                  key: TAPADM_PASSWORD
-            - name: TAPUSER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: youcat-db-credentials
-                  key: TAPUSER_PASSWORD
       volumes:
         - name: config-volume
           configMap:
