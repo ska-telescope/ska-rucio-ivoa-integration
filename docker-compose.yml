@@ -60,27 +60,7 @@ services:
       - JUPYTER_SERVER_BASE_URL=/
     networks:
       - common
-  datalink:
-    container_name: rucio_datalink
-    image: rucio-datalink
-    build:
-      context: ./rucio-datalink
-      dockerfile: Dockerfile
-    environment:
-      - DATA_MANAGEMENT_CLIENT_ID=0ab39d2f-5428-484b-815d-dadfbad17416
-      - DATA_MANAGEMENT_CLIENT_SCOPES=openid profile data-management-api-service
-      - DATA_MANAGEMENT_CLIENT_AUDIENCE=data-management-api
-      - DATA_MANAGEMENT_ENDPOINT=https://data-management.srcdev.skao.int/api/v1
-      - SERVICE_DATALINK_PORT=10000
-      - IVOA_AUTHORITY=auth.example.org/datasets/fits
-    env_file:
-      - .env
-    ports:
-      - 10000:10000
-    volumes:
-      - ./rucio-datalink/src:/opt/rucio_datalink/src:rw
-    networks:
-      - common
+
 networks:
   common:
     driver: bridge

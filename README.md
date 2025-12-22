@@ -20,7 +20,7 @@ and a set of common services, most of which are optional and depend on what func
 
 1. an instance of postgres with the [pgSphere](https://pgsphere.github.io/) extension enabled and necessary schema (`postgres-metadata`), 
 2. (optional) an instance of jupyterlab with notebooks demonstrating how to interact with these IVOA services using [pyvo](https://pypi.org/project/pyvo/) (`jupyter`),
-3. (optional, DaCHS only) a [Datalink](https://www.ivoa.net/documents/DataLink/) service that can be used to return an IVOA compliant `VOTable` describing the location of the nearest Rucio replica for a given DID. Note that the datalink service has only been tested with the DaCHS implementation.
+3. (optional, DaCHS only) [DEPRECATED/MOVED] A Datalink service was previously here but has been moved to `ska-src-api-integration-environment`.
 
 The postgres schema is dependent on which IVOA service provider is selected. As such, when building the `postgres-metadata` service it is necessary to provide the build argument `POSTGRES_INIT_DIR` which specifies the directory containing the database initialisation scripts (relative to `etc/init`).
 
@@ -146,22 +146,7 @@ These endpoints are additional to the ones described in `Running a TAP service -
 | Service            | Port  | Landing page                                   | Default user                                 | Default password | Other credentials |
 |--------------------|-------|------------------------------------------------|----------------------------------------------|-----------------|-------------------|
 | DaCHS SCS endpoint | 8080  | http://localhost:8080/rucio/rucio/cone/scs.xml | | | |
-| rucio-datalink     | 10000 | http://localhost:10000/links                   | | | |
 
-#### Deployment
-
-The `rucio-datalink` service requires the following additional environment variables to be set in the container, e.g. by using a `.env` file:
-
-- `DATA_MANAGEMENT_CLIENT_SECRET` is the data-management API (service) client secret,
-
-##### Locally
-
-These services can be built and brought up using `docker-compose`, specifying the build argument `POSTGRES_INIT_DIR=dachs`:
-
-```bash
-$ docker-compose build --build-arg POSTGRES_INIT_DIR=dachs postgres dachs jupyter datalink
-$ docker-compose up dachs jupyter postgres datalink
-```
 
 ##### To Kubernetes
 
