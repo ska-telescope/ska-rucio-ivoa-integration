@@ -20,7 +20,7 @@ and a set of common services, most of which are optional and depend on what func
 
 1. an instance of postgres with the [pgSphere](https://pgsphere.github.io/) extension enabled and necessary schema (`postgres-metadata`), 
 2. (optional) an instance of jupyterlab with notebooks demonstrating how to interact with these IVOA services using [pyvo](https://pypi.org/project/pyvo/) (`jupyter`),
-3. (optional, DaCHS only) [DEPRECATED/MOVED] A Datalink service was previously here but has been moved to `ska-src-api-integration-environment`.
+3. (optional, DaCHS only) [DEPRECATED/MOVED] A Datalink service was previously here but has been moved to [ska-src-dm-rucio-datalink](https://gitlab.com/ska-telescope/src/src-dm/ska-src-dm-rucio-datalink).
 
 The postgres schema is dependent on which IVOA service provider is selected. As such, when building the `postgres-metadata` service it is necessary to provide the build argument `POSTGRES_INIT_DIR` which specifies the directory containing the database initialisation scripts (relative to `etc/init`).
 
