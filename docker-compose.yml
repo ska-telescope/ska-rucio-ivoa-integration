@@ -86,7 +86,7 @@ services:
 
   youcat:
     container_name: youcat
-    image: images.opencadc.org/core/youcat:0.8.0
+    image: images.opencadc.org/core/youcat:0.9.0
     platform: linux/amd64
     ports:
       - "9090:8080"

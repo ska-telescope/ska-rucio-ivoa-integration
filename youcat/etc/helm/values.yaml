@@ -3,7 +3,7 @@
 ## Image configuration
 image:
   repository: images.opencadc.org/core/youcat
-  tag: 0.8.0
+  tag: 0.9.0
   pullPolicy: Always
 
 namespace: rucio-ivoa-integration
@@ -76,7 +76,7 @@ org:
         url: jdbc:postgresql://postgres-metadata-postgresql:5432/metadata
 
       # youcat.properties
-      adminUser: openid https://ska-iam.stfc.ac.uk/ 6cc69a9d-5f59-4816-90d0-dfb32d65a3d5
+      adminUser: https://ska-iam.stfc.ac.uk/ 6cc69a9d-5f59-4816-90d0-dfb32d65a3d5
       createSchemaInDB: false
 
 # catalina.properties
