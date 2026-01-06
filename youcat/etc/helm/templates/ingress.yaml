@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: youcat-ingress
+{{/*  labels:*/}}
+{{/*    app: youcat*/}}
+{{/*  annotations:*/}}
+{{/*    kubernetes.io/ingress.class: nginx*/}}
+spec:
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: youcat
+                port:
+                  number: 9090
+  ingressClassName: nginx
+{{/*  tls:*/}}
+{{/*    - hosts:*/}}
+{{/*        - {{ .Values.ingress.host }}*/}}
+{{/*      secretName: youcat-tls-secret*/}}

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: youcat
+  name: youcat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: youcat
+  template:
+    metadata:
+      labels:
+        app: youcat
+    spec:
+      containers:
+        - name: youcat
+          image: images.opencadc.org/core/youcat:0.8.0
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: temp-storage
+              mountPath: /tmp
+      volumes:
+        - name: config-volume
+          configMap:
+            name: youcat-config
+        - name: temp-storage
+          persistentVolumeClaim:
+            claimName: youcat-temp-storage
+      restartPolicy: Always

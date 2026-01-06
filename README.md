@@ -245,22 +245,33 @@ org.opencadc.youcat.adminUser = openid https://ska-iam.stfc.ac.uk/ abcdefgh-1234
 
 #### Deployment
 
-To run `youcat` locally, use the provided `docker-compose` file. `youcat` uses `postgres-metadata` and `dachs` and must be started after they are running.
-The database permissions have to be updated after `dachs` is run, and before `youcat` is started. `dachs` takes ownership of the `tap_schema` schema when it runs. `youcat` needs permissions to the `tap_schema` to create and update its tables.
-To update the database permissions run the `youcat-postgres-init.sql` as the `postgres` user.
+##### Updating database permissions
+Before deploying `youcat` using either the docker-compose file or the Helm chart for Kubernetes, both `dachs` and `postgres-metadata` must be deployed first. `youcat` uses schemas and tables created by `dachs` in the `postgres-metadata` database.
+The database permissions must be updated after `dachs` is running. `dachs` takes ownership of the `tap_schema` schema when it runs. `youcat` must be granted permissions to create and update tables in the `tap_schema`.
+To update the database permissions, as the `postgres` user run the `youcat-postgres-init.sql` against the `postgres-metadata` database.
 
 ```bash
 psql -d metadata -h localhost -p 5432 -U postgres -f youcat/youcat-postgres-init.sql
 ```
 
-Bring up `youcat`
+##### Locally
+
+To run `youcat` locally, use the provided `docker-compose` file.
 
 ```bash
 docker-compose build youcat
 docker-compose up youcat
 ```
 
+##### To Kubernetes
+
+`youcat` can be deployed to Kubernetes using Helm.
+
+```bash
+helm upgrade --install youcat youcat/etc/helm --values youcat/etc/helm/values.yaml
+```
+
 #### Adding an ivoa.obscore view on the rucio.obscore table to youcat
 
-To query the `rucio.obscore` table in youcat, the `rucio.obscore` table can be ingested into `youcat` as an `ivoa.obscore` view.
+After `youcat` has been deployed, to query the `rucio.obscore` table in `youcat`, the `rucio.obscore` table can be ingested into `youcat` as an `ivoa.obscore` view.
 The `youcat` [README](youcat/README.md) outlines the procedure to ingest a table into `youcat` as a view.
