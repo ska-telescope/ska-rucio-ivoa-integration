@@ -6,15 +6,16 @@
 
 This repository demonstrates how common IVOA services for data discovery and access may be integrated with [Rucio](https://github.com/rucio/rucio).
 
-Two IVOA implementations are currently supported, but with varying degrees of functionality:
+Three IVOA implementations are currently supported, but with varying degrees of functionality:
 
-- the [TAP library from CDS]((http://cdsportal.u-strasbg.fr/taptuto/index.html)), and
-- [DaCHS](https://docs.g-vo.org/DaCHS/)
-
+- the [TAP library from CDS]((http://cdsportal.u-strasbg.fr/taptuto/index.html)),
+- [DaCHS](https://docs.g-vo.org/DaCHS/), and
+- the [OpenCADC TAP service (youcat)]((https://github.com/opencadc/tap/tree/main/youcat))
 The full stack comprises five microservices, a combination of which need to be run for each stack. That is to say, **one** IVOA service provider, which is either
 
 - an instance of Apache Tomcat running the CDS Tap library servlet (`tomcat-tap`), **or**
-- an instance of DaCHS (`dachs`)
+- an instance of DaCHS (`dachs`), **or**
+- an instance of the CADC TAP service (`youcat`)
 
 and a set of common services, most of which are optional and depend on what functionality needs to be demonstrated: 
 
@@ -190,5 +191,76 @@ Building another table and creating triggers (3) clearly demarcates what is hand
 This may be a good candidate for distributed SQL, e.g. yugabyte, citus. With yugabyte it is possible to have multiple [RO replicas](https://docs.yugabyte.com/preview/architecture/docdb-replication/read-replicas/) where each SRC could have its own metadata database but with a singular source of truth.
 
 
+### Using the OpenCADC TAP service (youcat)
+
+The [youcat](https://github.com/opencadc/tap/tree/main/youcat) OpenCADC TAP service can be deployed to run alongside `dachs`, using the same database and querying the same `ObsCore` table as `dachs`. `youcat` uses versioned table names in the tap_schema that do not conflict with the `dachs` tap_schema table names. Both services create their own tap_schema tables on startup.
+`youcat` can run as a standalone TAP service, but for this use case `youcat` is configured to use an `ivoa.obscore` view on the `rucio` tables created by the `dachs` installation.
 
 
+#### Backend Database
+
+`youcat` uses the `postgres-metadata` database with the following schemas:
+
+- `tap_schema` containing the necessary TAP metadata tables.
+- `tap_upload` for user uploaded table.
+- `uws` to manage youcat jobs.
+
+| Service           | Port | User         | Password         | Other credentials     |
+|-------------------|------|----------- --|------------------|-----------------------|
+| postgres-metadata | 5432 | postgres     | secret           | database=metadata     |
+
+
+#### Configuration
+
+The configuration files for `youcat` are in the `youcat/config` directory, and are described in the [youcat GitHub repo](https://github.com/opencadc/tap/tree/main/youcat).
+
+For SKA, `youcat` is configured to use the SKA IAM prototype for authentication, and all requests to `youcat` require authentication. To authenticate include a header in the request with the callers bearer token:
+
+--header "authorization: bearer $SKA_IAM_TOKEN"
+
+`youcat` can optionally be configured with an admin user, which gives the user permissions to create schemas and tables in the tap_schema, and ingest external tables into the tap_schema. A configured admin user is required to ingest the `rucio.obscore` tables into `youcat`, as outlined in the `youcat` [README](youcat/README.md).
+The admin user is configured in the `youcat.properties` file using:
+
+```
+# (optional) configure the admin user
+# org.opencadc.youcat.adminUser = openid <openid service uri> <IAM client id>
+org.opencadc.youcat.adminUser = openid https://ska-iam.stfc.ac.uk/ abcdefgh-1234-5678-90d0-ijklmnopqrst
+```
+
+
+#### Available Endpoints
+
+| Service           | Endpoint                                  | Description                                                                       |
+|-------------------|-------------------------------------------|-----------------------------------------------------------------------------------|
+| youcat            | http://localhost:9090/youcat/sync         | synchronous TAP queries                                                           |
+|                   | http://localhost:9090/youcat/async        | asynchronous TAP queries                                                          |
+|                   | http://localhost:9090/youcat/tables       | view table metadata                                                               |
+|                   | http://localhost:9090/youcat/table-update | - add an index to a column in the tap_schema and create the index in the database |
+|                   |                                           | - add the metadata for an existing table or view to the tap_schema                |
+|                   | http://localhost:9090/youcat/load         | stream data to a table                                                            |
+|                   | http://localhost:9090/youcat/permissions  | manage permissions on a schema or table in the tap_schema                         |
+|                   | http://localhost:9090/youcat/capabilities | VOSI capabilities document                                                        |
+|                   | http://localhost:9090/youcat/availability | VOSI availability document                                                        |
+
+
+#### Deployment
+
+To run `youcat` locally, use the provided `docker-compose` file. `youcat` uses `postgres-metadata` and `dachs` and must be started after they are running.
+The database permissions have to be updated after `dachs` is run, and before `youcat` is started. `dachs` takes ownership of the `tap_schema` schema when it runs. `youcat` needs permissions to the `tap_schema` to create and update its tables.
+To update the database permissions run the `youcat-postgres-init.sql` as the `postgres` user.
+
+```bash
+psql -d metadata -h localhost -p 5432 -U postgres -f youcat/youcat-postgres-init.sql
+```
+
+Bring up `youcat`
+
+```bash
+docker-compose build youcat
+docker-compose up youcat
+```
+
+#### Adding an ivoa.obscore view on the rucio.obscore table to youcat
+
+To query the `rucio.obscore` table in youcat, the `rucio.obscore` table can be ingested into `youcat` as an `ivoa.obscore` view.
+The `youcat` [README](youcat/README.md) outlines the procedure to ingest a table into `youcat` as a view.

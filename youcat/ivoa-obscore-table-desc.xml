@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vosi:table xmlns:vosi="http://www.ivoa.net/xml/VOSITables/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:vte="http://www.opencadc.org/xml/VOSITables-ext/v0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="output">
+  <name>ivoa.obscore</name>
+  <column>
+    <name>access_estsize</name>
+    <description>estimated size of the download</description>
+    <unit>kbyte</unit>
+    <ucd>phys.size;meta.file</ucd>
+    <utype>obscore:Access.Size</utype>
+    <dataType xsi:type="vs:VOTableType">long</dataType>
+  </column>
+  <column>
+    <name>access_format</name>
+    <description>format of the data file(s)</description>
+    <ucd>meta.code.mime</ucd>
+    <utype>obscore:Access.Format</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+  </column>
+  <column>
+    <name>access_url</name>
+    <description>URL to download the data</description>
+    <ucd>meta.ref.url</ucd>
+    <utype>obscore:Access.Reference</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+  </column>
+  <column>
+    <name>calib_level</name>
+    <description>calibration level (0,1,2,3)</description>
+    <ucd>meta.code;obs.calib</ucd>
+    <utype>obscore:ObsDataset.calibLevel</utype>
+    <dataType xsi:type="vs:VOTableType">int</dataType>
+  </column>
+  <column>
+    <name>dataproduct_subtype</name>
+    <description>Data product specific type</description>
+    <ucd>meta.code.class</ucd>
+    <utype>obscore:obsdataset.dataproductsubtype</utype>
+    <dataType arraysize="*" xsi:type="vs:VOTableType">char</dataType>
+  </column>
+  <column>
+    <name>dataproduct_type</name>
+    <description>type of product</description>
+    <ucd>meta.code.class</ucd>
+    <utype>obscore:ObsDataset.dataProductType</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+  </column>
+  <column>
+    <name>em_max</name>
+    <description>stop spectral coordinate value</description>
+    <unit>m</unit>
+    <ucd>em.wl;stat.max</ucd>
+    <utype>obscore:Char.SpectralAxis.Coverage.Bounds.Limits.HiLimit</utype>
+    <dataType xsi:type="vs:VOTableType">double</dataType>
+  </column>
+  <column>
+    <name>em_min</name>
+    <description>start spectral coordinate value</description>
+    <unit>m</unit>
+    <ucd>em.wl;stat.min</ucd>
+    <utype>obscore:Char.SpectralAxis.Coverage.Bounds.Limits.LoLimit</utype>
+    <dataType xsi:type="vs:VOTableType">double</dataType>
+  </column>
+  <column>
+    <name>em_res_power</name>
+    <description>typical spectral resolution</description>
+    <ucd>spect.resolution</ucd>
+    <utype>obscore:Char.SpectralAxis.Resolution.ResolPower.refval</utype>
+    <dataType xsi:type="vs:VOTableType">double</dataType>
+  </column>
+  <column>
+    <name>em_ucd</name>
+    <description>UCD describing the spectral axis</description>
+    <ucd>meta.ucd</ucd>
+    <utype>obscore:Char.SpectralAxis.ucd</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+  </column>
+  <column>
+    <name>em_xel</name>
+    <description>dimensions (number of pixels) along the energy axis</description>
+    <ucd>meta.number</ucd>
+    <utype>obscore:Char.SpectralAxis.numBins</utype>
+    <dataType xsi:type="vs:VOTableType">long</dataType>
+  </column>
+  <column>
+    <name>facility_name</name>
+    <description>telescope name</description>
+    <ucd>meta.id;instr.tel</ucd>
+    <utype>obscore:Provenance.ObsConfig.Facility.name</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+  </column>
+  <column>
+    <name>instrument_name</name>
+    <description>instrument name</description>
+    <ucd>meta.id;instr</ucd>
+    <utype>obscore:Provenance.ObsConfig.Instrument.name</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+  </column>
+  <column>
+    <name>o_ucd</name>
+    <description>UCD describing the observable axis (pixel values)</description>
+    <ucd>meta.ucd</ucd>
+    <utype>obscore:Char.ObservableAxis.ucd</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+  </column>
+  <column>
+    <name>obs_collection</name>
+    <description>short name for the data colection</description>
+    <ucd>meta.id</ucd>
+    <utype>obscore:DataID.Collection</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+  </column>
+  <column>
+    <name>obs_creator_did</name>
+    <description>Dataset identifier assigned by the creator.</description>
+    <ucd>meta.id</ucd>
+    <utype>obscore:dataid.creatordid</utype>
+    <dataType arraysize="*" xsi:type="vs:VOTableType">char</dataType>
+  </column>
+  <column>
+    <name>obs_id</name>
+    <description>internal dataset identifier</description>
+    <ucd>meta.id</ucd>
+    <utype>obscore:DataID.observationID</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+  </column>
+  <column>
+    <name>obs_publisher_did</name>
+    <description>publisher dataset identifier</description>
+    <ucd>meta.ref.ivoid</ucd>
+    <utype>obscore:Curation.PublisherDID</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+  </column>
+  <column>
+    <name>obs_title</name>
+    <description>Free-from title of the data set</description>
+    <ucd>meta.title;obs</ucd>
+    <utype>obscore:dataid.title</utype>
+    <dataType arraysize="*" xsi:type="vs:VOTableType">char</dataType>
+  </column>
+  <column>
+    <name>pol_states</name>
+    <description>polarization states present in the data</description>
+    <ucd>meta.code;phys.polarization</ucd>
+    <utype>obscore:Char.PolarizationAxis.stateList</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+  </column>
+  <column>
+    <name>pol_xel</name>
+    <description>dimensions (number of pixels) along the polarization axis</description>
+    <ucd>meta.number</ucd>
+    <utype>obscore:Char.PolarizationAxis.numBins</utype>
+    <dataType xsi:type="vs:VOTableType">long</dataType>
+  </column>
+  <column>
+    <name>preview</name>
+    <description>URL of a preview (low-resolution, quick-to-retrieve representation) of the data.</description>
+    <ucd>meta.ref.url;meta.preview</ucd>
+    <dataType arraysize="*" xsi:type="vs:VOTableType">char</dataType>
+  </column>
+  <column>
+    <name>rucio_did_name</name>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+    <flag>indexed</flag>
+  </column>
+  <column>
+    <name>rucio_did_scope</name>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+    <flag>indexed</flag>
+  </column>
+  <column>
+    <name>s_dec</name>
+    <description>DEC of central coordinates</description>
+    <unit>deg</unit>
+    <ucd>pos.eq.dec</ucd>
+    <utype>obscore:Char.SpatialAxis.Coverage.Location.Coord.Position2D.Value2.C2</utype>
+    <dataType xsi:type="vs:VOTableType">double</dataType>
+  </column>
+  <column>
+    <name>s_fov</name>
+    <description>size of the region covered (~diameter of minimum bounding circle)</description>
+    <unit>deg</unit>
+    <ucd>phys.angSize;instr.fov</ucd>
+    <utype>obscore:Char.SpatialAxis.Coverage.Bounds.Extent.diameter</utype>
+    <dataType xsi:type="vs:VOTableType">double</dataType>
+  </column>
+  <column>
+    <name>s_pixel_scale</name>
+    <description>Sampling period in world coordinate units along the spatial axis</description>
+    <unit>arcsec</unit>
+    <ucd>phys.angSize;instr.pixel</ucd>
+    <utype>obscore:Char.SpatialAxis.Sampling.RefVal.SamplingPeriod</utype>
+    <dataType xsi:type="vs:VOTableType">double</dataType>
+  </column>
+  <column>
+    <name>s_ra</name>
+    <description>RA of central coordinates</description>
+    <unit>deg</unit>
+    <ucd>pos.eq.ra</ucd>
+    <utype>obscore:Char.SpatialAxis.Coverage.Location.Coord.Position2D.Value2.C1</utype>
+    <dataType xsi:type="vs:VOTableType">double</dataType>
+  </column>
+  <column>
+    <name>s_region</name>
+    <description>region bounded by observation</description>
+    <ucd>pos.outline;obs.field</ucd>
+    <utype>obscore:Char.SpatialAxis.Coverage.Support.Area</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="*" extendedType="polygon">double</dataType>
+    <flag>indexed</flag>
+  </column>
+  <column>
+    <name>s_resolution</name>
+    <description>typical spatial resolution</description>
+    <unit>arcsec</unit>
+    <ucd>pos.angResolution</ucd>
+    <utype>obscore:Char.SpatialAxis.Resolution.refval.value</utype>
+    <dataType xsi:type="vs:VOTableType">double</dataType>
+  </column>
+  <column>
+    <name>s_xel1</name>
+    <description>dimensions (number of pixels) along one spatial axis</description>
+    <ucd>meta.number</ucd>
+    <utype>obscore:Char.SpatialAxis.numBins1</utype>
+    <dataType xsi:type="vs:VOTableType">long</dataType>
+  </column>
+  <column>
+    <name>s_xel2</name>
+    <description>dimensions (number of pixels) along the other spatial axis</description>
+    <ucd>meta.number</ucd>
+    <utype>obscore:Char.SpatialAxis.numBins2</utype>
+    <dataType xsi:type="vs:VOTableType">long</dataType>
+  </column>
+  <column>
+    <name>t_exptime</name>
+    <description>exposure time of observation</description>
+    <unit>s</unit>
+    <ucd>time.duration;obs.exposure</ucd>
+    <utype>obscore:Char.TimeAxis.Coverage.Support.Extent</utype>
+    <dataType xsi:type="vs:VOTableType">double</dataType>
+  </column>
+  <column>
+    <name>t_max</name>
+    <description>end time of observation (MJD)</description>
+    <unit>d</unit>
+    <ucd>time.end;obs.exposure</ucd>
+    <utype>obscore:Char.TimeAxis.Coverage.Bounds.Limits.StopTime</utype>
+    <dataType xsi:type="vs:VOTableType">double</dataType>
+  </column>
+  <column>
+    <name>t_min</name>
+    <description>start time of observation (MJD)</description>
+    <unit>d</unit>
+    <ucd>time.start;obs.exposure</ucd>
+    <utype>obscore:Char.TimeAxis.Coverage.Bounds.Limits.StartTime</utype>
+    <dataType xsi:type="vs:VOTableType">double</dataType>
+  </column>
+  <column>
+    <name>t_resolution</name>
+    <description>typical temporal resolution</description>
+    <unit>s</unit>
+    <ucd>time.resolution</ucd>
+    <utype>obscore:Char.TimeAxis.Resolution.refval.value</utype>
+    <dataType xsi:type="vs:VOTableType">double</dataType>
+  </column>
+  <column>
+    <name>t_xel</name>
+    <description>dimensions (number of pixels) along the time axis</description>
+    <ucd>meta.number</ucd>
+    <utype>obscore:Char.TimeAxis.numBins</utype>
+    <dataType xsi:type="vs:VOTableType">long</dataType>
+  </column>
+  <column>
+    <name>target_class</name>
+    <description>Class of the target object (star, QSO, ...)</description>
+    <ucd>src.class</ucd>
+    <utype>obscore:target.class</utype>
+    <dataType arraysize="*" xsi:type="vs:VOTableType">char</dataType>
+  </column>
+  <column>
+    <name>target_name</name>
+    <description>name of intended target</description>
+    <ucd>meta.id;src</ucd>
+    <utype>obscore:Target.Name</utype>
+    <dataType xsi:type="vs:VOTableType" arraysize="2147483647*">char</dataType>
+  </column>
+</vosi:table>
